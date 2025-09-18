@@ -1,32 +1,38 @@
 const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose'); // tambahin ini
+const User = require('../models/userModel');
 
-function authMiddleware(req, res, next) {
-  if (process.env.NODE_ENV === 'development') {
-    // generate ObjectId valid
-    req.user = { id: new mongoose.Types.ObjectId(), role: 'HSE' };
-    return next();
-  }
+const authMiddleware = async (req, res, next) => {
+  let token;
+  const authHeader = req.headers.authorization;
 
-  const header = req.headers['authorization'];
-  if (!header) return res.status(401).json({ message: 'No token' });
+  if (authHeader && authHeader.startsWith('Bearer')) {
+    try {
+      token = authHeader.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-  const token = header.split(' ')[1];
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ message: 'Invalid token' });
-    req.user = user;
-    next();
-  });
-}
-
-
-function roleCheck(role) {
-  return (req, res, next) => {
-    if (req.user.role !== role) {
-      return res.status(403).json({ message: 'Forbidden: role mismatch' });
+      req.user = await User.findById(decoded.id).select('-password');
+      next();
+    } catch (error) {
+      res.status(401);
+      next(new Error('Not authorized, token failed'));
     }
-    next();
   }
-}
+
+  if (!token) {
+    res.status(401);
+    next(new Error('Not authorized, no token'));
+  }
+};
+
+const roleCheck = (...allowedRoles) => {
+  return (req, res, next) => {
+    if (req.user && allowedRoles.includes(req.user.role)) {
+      next();
+    } else {
+      res.status(403);
+      next(new Error('Forbidden: You do not have the required role.'));
+    }
+  };
+};
 
 module.exports = { authMiddleware, roleCheck };
