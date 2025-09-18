@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/kayanaazaria/kelompok4-paw#readme",
   "dependencies": {
+<<<<<<< HEAD
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
@@ -27,6 +28,17 @@
     "mongodb": "^6.19.0",
     "mongoose": "^8.18.1",
     "nodemailer": "^7.0.6"
+=======
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.18.1",
+    "multer": "^2.0.2"
+>>>>>>> fa6abe6b431ea85f4462a5dfe01a7153893ea3ab
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
