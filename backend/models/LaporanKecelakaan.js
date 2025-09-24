@@ -16,12 +16,16 @@ const LaporanSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: [
+      'Draft',
       'Menunggu Persetujuan Kepala Bidang',
       'Menunggu Persetujuan Direktur SDM',
-      'Disetujui'
+      'Disetujui',
+      'Ditolak Kepala Bidang',
+      'Ditolak Direktur SDM'
     ],
-    default: 'Menunggu Persetujuan Kepala Bidang'
+    default: 'Draft'
   },
+  isDraft: { type: Boolean, default: true },
   createdByHSE: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   signedByKabid: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   approvedByDirektur: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }

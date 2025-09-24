@@ -1,37 +1,47 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/userModel');
+const jwt = require("jsonwebtoken");
+const User = require("../models/userModel");
 
+// 🔑 Middleware untuk verifikasi JWT
 const authMiddleware = async (req, res, next) => {
   let token;
-  const authHeader = req.headers.authorization;
 
-  if (authHeader && authHeader.startsWith('Bearer')) {
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
     try {
-      token = authHeader.split(' ')[1];
+      token = req.headers.authorization.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      req.user = await User.findById(decoded.id).select('-password');
-      next();
-    } catch (error) {
-      res.status(401);
-      next(new Error('Not authorized, token failed'));
+      req.user = await User.findById(decoded.id).select("-password");
+      if (!req.user) {
+        return res.status(401).json({ message: "User tidak ditemukan" });
+      }
+
+      return next();
+    } catch (err) {
+      console.error(err);
+      return res.status(401).json({ message: "Token tidak valid" });
     }
   }
 
   if (!token) {
-    res.status(401);
-    next(new Error('Not authorized, no token'));
+    return res.status(401).json({ message: "Tidak ada token, akses ditolak" });
   }
 };
 
-const roleCheck = (...allowedRoles) => {
+// 🎭 Middleware untuk cek role
+const roleCheck = (role) => {
   return (req, res, next) => {
-    if (req.user && allowedRoles.includes(req.user.role)) {
-      next();
-    } else {
-      res.status(403);
-      next(new Error('Forbidden: You do not have the required role.'));
+    if (!req.user) {
+      return res.status(401).json({ message: "Tidak ada user di request" });
     }
+    if (req.user.role !== role) {
+      return res
+        .status(403)
+        .json({ message: `Hanya ${role} yang bisa mengakses route ini` });
+    }
+    next();
   };
 };
 
