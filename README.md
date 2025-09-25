@@ -11,12 +11,35 @@ Digitalisasi Sistem Laporan Kecelakaan Solanum Agrotech (US1)
 4. Gabriele Ghea De Palma (23/512218/TK/56306)
 5. Kayana Anindya Azaria (23/521475/TK/57528)
 
+## Deskripsi Aplikasi
+Aplikasi ini dikembangkan untuk mendigitalisasi proses pelaporan kecelakaan kerja di Solanum Agrotech. Dengan sistem ini, seluruh proses mulai dari pembuatan laporan oleh HSE, approval oleh Kepala Bidang, hingga persetujuan akhir Direktur SDM dapat dilakukan secara terintegrasi, aman, dan terdokumentasi dengan baik. Aplikasi web ini dibuat untuk menghindari kehilangan dokumen ataupun dokumen tercecer.
+Fitur utama meliputi:
+Registrasi & Login Multi-Role (Admin, HSE, Kepala Bidang, Direktur SDM).
+Pembuatan & Pengajuan Laporan Kecelakaan oleh HSE.
+Tracking status laporan (Draft, Menunggu Approval, Selesai).
+Approval & Penolakan laporan oleh Kepala Bidang dan Direktur SDM.
+Notifikasi Email Otomatis untuk setiap tahap persetujuan.
+History dokumen & QR Code untuk verifikasi laporan final.
+Keamanan sistem dengan password hashing & JWT Authentication.
+Manajemen data terintegrasi dengan MongoDB.
+
+##Teknologi yang Digunakan Selama Pengembangan
+Backend Framework: Express.js
+Database: MongoDB Atlas
+ODM: Mongoose
+Authentication: JWT (JSON Web Token)
+Password Security: bcrypt.js
+Email Notification: Nodemailer (SMTP Gmail)
+File Upload: Multer (untuk upload attachment laporan)
+Version Control: Git + GitHub
+Testing API: Postman
+
 ## 👥 Pembagian Kontribusi Anggota
 
 | Nama    | Fitur                                                                                                    |
 |---------|-----------------------------------------------------------------------------------------------------------------|
 | **Ega** | **Role Admin**: fitur assign role, atur registrasi akun <br> **Role Kepala Bidang & Direktur SDM**: registrasi + login <br> **Role HSE**: registrasi + login <br> **Tambahan**: pengamanan API sensitif dengan authorization (akses berdasarkan role) |
 | **Gaby** | **Role Kepala Bidang & Direktur SDM**: notifikasi email untuk approval, daftar pengajuan (lihat detail, approve/tolak) <br> **Role HSE**: tracking status (draft, menunggu approval, selesai) <br> **Tambahan**: password hashing untuk menyimpan password di database |
-| **Kayana** | **Role Kepala Bidang & Direktur SDM**: history dokumen yang sudah diapprove, fitur trash (recover ≤ 30 hari), filter & search <br> **Role HSE**: trash (recover ≤ 30 hari), filter & search <br> **Tambahan**: integrasi database MongoDB |
+| **Kayana** | **Role Kepala Bidang & Direktur SDM**: history dokumen yang sudah diapprove, filter & search <br> **Role HSE**: history dokumen yang sudah diapprove, filter & search <br> **Tambahan**: integrasi database MongoDB |
 | **Nicho** | **Role HSE**: form input laporan kecelakaan (tanggal, bagian, nama, NIP, detail kejadian, skala cedera), fitur upload attachment <br> **Tambahan**: API CRUD untuk laporan |
 | **Sharon** | **Role Kepala Bidang & Direktur SDM**: generate history alur penandatanganan & QR code (link ke dokumen final) <br> **Role HSE**: lihat & export final document <br> **Tambahan**: fitur login via Google (OAuth2) |
