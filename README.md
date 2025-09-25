@@ -14,25 +14,26 @@ Digitalisasi Sistem Laporan Kecelakaan Solanum Agrotech (US1)
 ## Deskripsi Aplikasi
 Aplikasi ini dikembangkan untuk mendigitalisasi proses pelaporan kecelakaan kerja di Solanum Agrotech. Dengan sistem ini, seluruh proses mulai dari pembuatan laporan oleh HSE, approval oleh Kepala Bidang, hingga persetujuan akhir Direktur SDM dapat dilakukan secara terintegrasi, aman, dan terdokumentasi dengan baik. Aplikasi web ini dibuat untuk menghindari kehilangan dokumen ataupun dokumen tercecer.
 Fitur utama meliputi:
-Registrasi & Login Multi-Role (Admin, HSE, Kepala Bidang, Direktur SDM).
-Pembuatan & Pengajuan Laporan Kecelakaan oleh HSE.
-Tracking status laporan (Draft, Menunggu Approval, Selesai).
-Approval & Penolakan laporan oleh Kepala Bidang dan Direktur SDM.
-Notifikasi Email Otomatis untuk setiap tahap persetujuan.
-History dokumen & QR Code untuk verifikasi laporan final.
-Keamanan sistem dengan password hashing & JWT Authentication.
-Manajemen data terintegrasi dengan MongoDB.
+- Registrasi & Login Multi-Role (Admin, HSE, Kepala Bidang, Direktur SDM).
+- Pembuatan & Pengajuan Laporan Kecelakaan oleh HSE.
+- Tracking status laporan (Draft, Menunggu Approval, Selesai).
+- Approval & Penolakan laporan oleh Kepala Bidang dan Direktur SDM.
+- Notifikasi Email Otomatis untuk setiap tahap persetujuan.
+- History dokumen & QR Code untuk verifikasi laporan final.
+- Keamanan sistem dengan password hashing & JWT Authentication.
+- Manajemen data terintegrasi dengan MongoDB.
 
-##Teknologi yang Digunakan Selama Pengembangan
-Backend Framework: Express.js
-Database: MongoDB Atlas
-ODM: Mongoose
-Authentication: JWT (JSON Web Token)
-Password Security: bcrypt.js
-Email Notification: Nodemailer (SMTP Gmail)
-File Upload: Multer (untuk upload attachment laporan)
-Version Control: Git + GitHub
-Testing API: Postman
+## Teknologi yang Digunakan Selama Pengembangan
+- Code Editor: VS Code
+- Backend Framework: Express.js
+- Database: MongoDB Atlas
+- ODM: Mongoose
+- Authentication: JWT (JSON Web Token)
+- Password Security: bcrypt.js
+- Email Notification: Nodemailer (SMTP Gmail)
+- File Upload: Multer (untuk upload attachment laporan)
+- Version Control: Git + GitHub
+- Testing API: Postman
 
 ## 👥 Pembagian Kontribusi Anggota
 
