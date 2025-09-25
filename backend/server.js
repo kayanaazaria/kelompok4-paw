@@ -32,3 +32,8 @@ app.use('/auth', authRoutes);
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });
+
+app.use((err, _req, res, _next) => {
+  console.error(err);
+  res.status(500).json({ message: 'Internal error' });
+});
