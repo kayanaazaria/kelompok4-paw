@@ -1,56 +1,29 @@
-const PDFDocument = require('pdfkit');
-const QRCode = require('qrcode');
+const Report = require('../models/Report');
+const Approval = require('../models/Approval');
 
-/**
- * Membangun PDF final dokumen (in-memory Buffer) + QR link
- * @param {Object} report - data laporan
- * @returns {Promise<{pdfBuffer: Buffer, qrLink: string}>}
- */
-async function buildFinalPdf(report) {
-  const doc = new PDFDocument({ size: 'A4', margin: 50 });
-
-  const chunks = [];
-  doc.on('data', (c) => chunks.push(c));
-  const done = new Promise((resolve) => doc.on('end', () => resolve(Buffer.concat(chunks))));
-
-  // Judul
-  doc.fontSize(18).text('Laporan Kecelakaan Kerja', { align: 'center' });
-  doc.moveDown();
-
-  // Info dasar
-  const tgl = report.date ? new Date(report.date).toLocaleDateString('id-ID') : '-';
-  doc.fontSize(12);
-  doc.text(`Tanggal        : ${tgl}`);
-  doc.text(`Departemen     : ${report.department || '-'}`);
-  doc.text(`Nama Pekerja   : ${report.employeeName || '-'}`);
-  doc.text(`NIP            : ${report.employeeNip || '-'}`);
-  doc.text(`Skala Cedera   : ${report.injuryScale || '-'}`);
-  doc.moveDown();
-  doc.text('Deskripsi:', { underline: true });
-  doc.text(report.description || '-');
-  doc.moveDown();
-
-  // Alur tanda tangan
-  doc.text('Alur Tanda Tangan:', { underline: true });
-  (report.signFlow || []).forEach((s) => {
-    const waktu = s.at ? new Date(s.at).toLocaleString('id-ID') : '-';
-    const oleh  = s.userName ? `oleh ${s.userName}` : '';
-    doc.text(`• Step ${s.step} - ${s.role}: ${s.status} ${oleh} (${waktu})`);
-  });
-  doc.moveDown();
-
-  // QR code
-  const port = process.env.PORT || 5001;
-  const qrLink = report.qrLink || `http://localhost:${port}/finaldoc/reports/${report._id}/final.pdf`;
-  const qrBuf  = await QRCode.toBuffer(qrLink, { margin: 1, scale: 6 });
-
-  doc.text('Scan QR untuk verifikasi dokumen:');
-  doc.image(qrBuf, { width: 120 });
-  doc.fontSize(10).fillColor('gray').text(qrLink);
-
-  doc.end();
-  const pdfBuffer = await done;
-  return { pdfBuffer, qrLink };
+async function getReportByCode(code) {
+  return Report.findOne({ code }).lean();
 }
 
-module.exports = { buildFinalPdf };
+async function getApprovalsByReport(reportId) {
+  return Approval.find({ reportId }).sort({ step: 1 }).lean();
+}
+
+function signflowFromApprovals(approvals) {
+  const map = new Map(approvals.map(a => [a.step, a]));
+  return [
+    { step:1, role:'HSE',           status: map.get(1)?.status ?? 'PENDING', userName: map.get(1)?.userName, at: map.get(1)?.at },
+    { step:2, role:'KEPALA_BIDANG', status: map.get(2)?.status ?? 'PENDING', userName: map.get(2)?.userName, at: map.get(2)?.at },
+    { step:3, role:'DIREKTUR_SDM',  status: map.get(3)?.status ?? 'PENDING', userName: map.get(3)?.userName, at: map.get(3)?.at },
+  ];
+}
+
+async function getHistoryByCode(code) {
+  const report = await getReportByCode(code);
+  if (!report) return null;
+  const approvals = await getApprovalsByReport(report._id);
+  const signFlow = signflowFromApprovals(approvals);
+  return { id: report.code, status: report.status, report, signFlow };
+}
+
+module.exports = { getHistoryByCode };
