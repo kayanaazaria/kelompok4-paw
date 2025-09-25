@@ -5,13 +5,21 @@ const sendEmail = require("../utils/sendEmail");
 // Buat laporan (HSE simpan Draft)
 const createLaporan = async (req, res) => {
   try {
+    console.log("DEBUG req.user:", req.user);
+    console.log("DEBUG req.body:", req.body);
+    console.log("DEBUG req.file:", req.file);
+
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "User tidak terautentikasi" });
+    }
     const laporan = await Laporan.create({
       ...req.body,
       createdByHSE: req.user._id,
       status: "Draft",
       isDraft: true,
+      attachmentUrl: req.file ? `/uploads/${req.file.filename}` : null,
     });
-
+    console.log("DEBUG laporan created:", laporan);
     res.status(201).json(laporan);
   } catch (error) {
     console.error(error);
@@ -19,6 +27,32 @@ const createLaporan = async (req, res) => {
   }
 };
 
+// UPDATE laporan (bisa ubah data atau ganti file)
+const updateLaporan = async (req, res) => {
+  try {
+    const body = req.body;
+    if (req.file) body.attachmentUrl = `/uploads/${req.file.filename}`;
+
+    const laporan = await Laporan.findByIdAndUpdate(req.params.id, body, { new: true });
+    if (!laporan) return res.status(404).json({ message: "Laporan tidak ditemukan" });
+
+    res.json(laporan);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// DELETE laporan
+const deleteLaporan = async (req, res) => {
+  try {
+    const laporan = await Laporan.findByIdAndDelete(req.params.id);
+    if (!laporan) return res.status(404).json({ message: "Laporan tidak ditemukan" });
+
+    res.json({ message: "Laporan berhasil dihapus" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 // Submit laporan (Draft → Menunggu Kabid) + notif Kabid & Direktur
 const submitLaporan = async (req, res) => {
   try {
@@ -236,6 +270,8 @@ module.exports = {
   getAllLaporan,
   getLaporanById,
   getLaporanByStatus,
+  updateLaporan,
+  deleteLaporan,
   trackLaporanHSE,
   approveByKepalaBidang,
   rejectByKepalaBidang,

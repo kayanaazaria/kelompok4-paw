@@ -1,4 +1,6 @@
 const express = require("express");
+const path = require('path');
+const multer = require('multer');
 const router = express.Router();
 const { authMiddleware, roleCheck } = require("../middleware/auth");
 const {
@@ -7,19 +9,50 @@ const {
   getAllLaporan,
   getLaporanById,
   getLaporanByStatus,
+  updateLaporan,
+  deleteLaporan,
   trackLaporanHSE,
   approveByKepalaBidang,
   rejectByKepalaBidang,
   approveByDirektur,
   rejectByDirektur,
 } = require("../controllers/laporanController");
+const { get } = require("http");
 
 //
 // ========================= HSE ROUTES =========================
 //
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../uploads')); // folder simpan
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname); // ambil ekstensi asli
+    const unique = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, unique + ext); // simpan dengan nama unik + ekstensi asli
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['.pdf', '.jpg', '.jpeg', '.png'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    const mime = file.mimetype.toLowerCase();
+    if (allowed.includes(ext) &&
+        (mime.includes('pdf') || mime.includes('jpeg') || mime.includes('jpg') || mime.includes('png'))) {
+      cb(null, true);
+    } else {
+      cb(new Error('File tidak didukung'), false);
+    }
+  }
+});
 
 // HSE buat laporan (Draft)
-router.post("/", authMiddleware, roleCheck("hse"), createLaporan);
+router.post("/", authMiddleware, roleCheck("hse"), upload.single("attachment"), createLaporan);
+router.put("/:id", authMiddleware, roleCheck("HSE"), upload.single("attachment"), updateLaporan);
+router.delete("/:id", authMiddleware, roleCheck("HSE"), deleteLaporan);
 
 // HSE submit laporan dari Draft → Menunggu Kabid
 router.put("/:id/submit", authMiddleware, roleCheck("hse"), submitLaporan);
