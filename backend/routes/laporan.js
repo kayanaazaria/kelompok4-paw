@@ -51,8 +51,8 @@ const upload = multer({
 
 // HSE buat laporan (Draft)
 router.post("/", authMiddleware, roleCheck("hse"), upload.single("attachment"), createLaporan);
-router.put("/:id", authMiddleware, roleCheck("HSE"), upload.single("attachment"), updateLaporan);
-router.delete("/:id", authMiddleware, roleCheck("HSE"), deleteLaporan);
+router.put("/:id", authMiddleware, roleCheck("hse"), upload.single("attachment"), updateLaporan);
+router.delete("/:id", authMiddleware, roleCheck("hse"), deleteLaporan);
 
 // HSE submit laporan dari Draft → Menunggu Kabid
 router.put("/:id/submit", authMiddleware, roleCheck("hse"), submitLaporan);
