@@ -1,14 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const { listReports, getHistory, getFinalPdf } = require('../controllers/finalDoc.controller');
+const finalDocController = require('../controllers/finalDoc.controller');
 
-// Daftar report mock
-router.get('/reports', listReports);
+// list & history
+router.get('/reports', finalDocController.listReports);
+router.get('/reports/:code/history', finalDocController.getHistory);
 
-// Timeline tanda tangan
-router.get('/reports/:id/history', getHistory);
+// PDF inline & download
+router.get('/reports/:code/final.pdf', finalDocController.getFinalPdf);
+router.get('/reports/:code/final/download', finalDocController.downloadFinalPdf);
 
-// Export final PDF
-router.get('/reports/:id/final.pdf', getFinalPdf);
+// verifikasi (buat QR)
+router.get('/reports/:code/verify', finalDocController.verifyPage);
 
 module.exports = router;
