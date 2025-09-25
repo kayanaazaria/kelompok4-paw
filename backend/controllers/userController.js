@@ -1,6 +1,5 @@
-const { User } = require('../models/userModel'); // ✅ perbaikan import
+const User = require('../models/userModel'); 
 
-// Create user (khusus admin)
 const createUser = async (req, res, next) => {
   const { username, email, password, role, department } = req.body;
   try {
@@ -62,7 +61,9 @@ const updateUserRoleAndDepartment = async (req, res, next) => {
       }
       user.department = department;
     } else {
-      user.department = undefined;
+		if (user.role !== 'kepala_bidang') {
+          user.department = undefined;
+		}
     }
 
     const updatedUser = await user.save();
