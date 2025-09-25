@@ -1,18 +1,36 @@
 // routes/laporan.js
 const express = require('express');
+const path = require('path');
 const multer = require('multer');
 const Laporan = require('../models/LaporanKecelakaan');
 const { authMiddleware, roleCheck } = require('../middleware/auth');
 
 const router = express.Router();
 
-// konfigurasi multer
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // folder simpan
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname); // ambil ekstensi asli
+    const unique = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, unique + ext); // simpan dengan nama unik + ekstensi asli
+  }
+});
+
 const upload = multer({
-  dest: 'uploads/',
-  limits: { fileSize: 5*1024*1024 },
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const ok = /pdf|jpeg|jpg|png/.test(file.mimetype);
-    cb(ok ? null : new Error('File tidak didukung'), ok);
+    const allowed = ['.pdf', '.jpg', '.jpeg', '.png'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    const mime = file.mimetype.toLowerCase();
+    if (allowed.includes(ext) &&
+        (mime.includes('pdf') || mime.includes('jpeg') || mime.includes('jpg') || mime.includes('png'))) {
+      cb(null, true);
+    } else {
+      cb(new Error('File tidak didukung'), false);
+    }
   }
 });
 
@@ -36,6 +54,7 @@ router.post('/', authMiddleware, roleCheck('HSE'), upload.single('attachment'), 
 // READ semua laporan
 router.get('/', authMiddleware, async (req, res) => {
   const data = await Laporan.find().sort({ createdAt: -1 });
+  console.log("DATA:", data);
   res.json(data);
 });
 
