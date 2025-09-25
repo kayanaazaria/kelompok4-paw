@@ -23,6 +23,9 @@ Fitur utama meliputi:
 - Keamanan sistem dengan password hashing & JWT Authentication.
 - Manajemen data terintegrasi dengan MongoDB.
 
+## Struktur Folder dan File
+
+
 ## Teknologi yang Digunakan Selama Pengembangan
 - Code Editor: VS Code
 - Backend Framework: Express.js
@@ -34,6 +37,9 @@ Fitur utama meliputi:
 - File Upload: Multer (untuk upload attachment laporan)
 - Version Control: Git + GitHub
 - Testing API: Postman
+
+## URL Google Drive Laporan
+
 
 ## 👥 Pembagian Kontribusi Anggota
 
