@@ -1,32 +1,48 @@
-const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose'); // tambahin ini
+const jwt = require("jsonwebtoken");
+const User = require("../models/userModel");
 
-function authMiddleware(req, res, next) {
-  if (process.env.NODE_ENV === 'development') {
-    // generate ObjectId valid
-    req.user = { id: new mongoose.Types.ObjectId(), role: 'HSE' };
-    return next();
+// 🔑 Middleware untuk verifikasi JWT
+const authMiddleware = async (req, res, next) => {
+  let token;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    try {
+      token = req.headers.authorization.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      req.user = await User.findById(decoded.id).select("-password");
+      if (!req.user) {
+        return res.status(401).json({ message: "User tidak ditemukan" });
+      }
+
+      return next();
+    } catch (err) {
+      console.error(err);
+      return res.status(401).json({ message: "Token tidak valid" });
+    }
   }
 
-  const header = req.headers['authorization'];
-  if (!header) return res.status(401).json({ message: 'No token' });
+  if (!token) {
+    return res.status(401).json({ message: "Tidak ada token, akses ditolak" });
+  }
+};
 
-  const token = header.split(' ')[1];
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ message: 'Invalid token' });
-    req.user = user;
-    next();
-  });
-}
-
-
-function roleCheck(role) {
+// 🎭 Middleware untuk cek role
+const roleCheck = (role) => {
   return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ message: "Tidak ada user di request" });
+    }
     if (req.user.role !== role) {
-      return res.status(403).json({ message: 'Forbidden: role mismatch' });
+      return res
+        .status(403)
+        .json({ message: `Hanya ${role} yang bisa mengakses route ini` });
     }
     next();
-  }
-}
+  };
+};
 
 module.exports = { authMiddleware, roleCheck };

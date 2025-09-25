@@ -1,15 +1,30 @@
-// routes/laporan.js
-const express = require('express');
+const express = require("express");
 const path = require('path');
 const multer = require('multer');
-const Laporan = require('../models/LaporanKecelakaan');
-const { authMiddleware, roleCheck } = require('../middleware/auth');
-
 const router = express.Router();
+const { authMiddleware, roleCheck } = require("../middleware/auth");
+const {
+  createLaporan,
+  submitLaporan,
+  getAllLaporan,
+  getLaporanById,
+  getLaporanByStatus,
+  updateLaporan,
+  deleteLaporan,
+  trackLaporanHSE,
+  approveByKepalaBidang,
+  rejectByKepalaBidang,
+  approveByDirektur,
+  rejectByDirektur,
+} = require("../controllers/laporanController");
+const { get } = require("http");
 
+//
+// ========================= HSE ROUTES =========================
+//
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // folder simpan
+    cb(null, path.join(__dirname, '../uploads')); // folder simpan
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname); // ambil ekstensi asli
@@ -34,61 +49,41 @@ const upload = multer({
   }
 });
 
-// CREATE laporan (HSE only)
-router.post('/', authMiddleware, roleCheck('HSE'), upload.single('attachment'), async (req, res) => {
-  try {
-    const body = req.body;
-    const laporan = new Laporan({
-      ...body,
-      tanggalKejadian: new Date(body.tanggalKejadian),
-      createdBy: req.user.id,
-      attachmentUrl: req.file ? `/uploads/${req.file.filename}` : null
-    });
-    await laporan.save();
-    res.status(201).json(laporan);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
+// HSE buat laporan (Draft)
+router.post("/", authMiddleware, roleCheck("hse"), upload.single("attachment"), createLaporan);
+router.put("/:id", authMiddleware, roleCheck("HSE"), upload.single("attachment"), updateLaporan);
+router.delete("/:id", authMiddleware, roleCheck("HSE"), deleteLaporan);
 
-// READ semua laporan
-router.get('/', authMiddleware, async (req, res) => {
-  const data = await Laporan.find().sort({ createdAt: -1 });
-  console.log("DATA:", data);
-  res.json(data);
-});
+// HSE submit laporan dari Draft → Menunggu Kabid
+router.put("/:id/submit", authMiddleware, roleCheck("hse"), submitLaporan);
 
-// READ detail laporan
-router.get('/:id', authMiddleware, async (req, res) => {
-  try {
-    const laporan = await Laporan.findById(req.params.id);
-    if (!laporan) return res.status(404).json({ message: 'Not found' });
-    res.json(laporan);
-  } catch (err) {
-    res.status(400).json({ message: 'Invalid ID' });
-  }
-});
+// HSE tracking laporan (draft, menunggu, selesai)
+router.get("/hse/tracking", authMiddleware, roleCheck("hse"), trackLaporanHSE);
 
-// UPDATE laporan (misal: edit detail oleh HSE)
-router.put('/:id', authMiddleware, roleCheck('HSE'), upload.single('attachment'), async (req, res) => {
-  try {
-    const body = req.body;
-    if (req.file) body.attachmentUrl = `/uploads/${req.file.filename}`;
-    const laporan = await Laporan.findByIdAndUpdate(req.params.id, body, { new: true });
-    res.json(laporan);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
+//
+// ========================= PUBLIC ROUTES =========================
+//
 
-// DELETE laporan
-router.delete('/:id', authMiddleware, roleCheck('HSE'), async (req, res) => {
-  try {
-    await Laporan.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Laporan deleted' });
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
+// Semua user bisa filter laporan berdasarkan status
+// contoh: GET /api/laporan/status/filter?status=Disetujui
+router.get("/status/filter", authMiddleware, getLaporanByStatus);
+
+// Semua user bisa lihat semua laporan
+router.get("/", authMiddleware, getAllLaporan);
+
+// Semua user bisa lihat detail laporan by ID
+router.get("/:id", authMiddleware, getLaporanById);
+
+//
+// ========================= APPROVAL ROUTES =========================
+//
+
+// Kepala Bidang approve/reject
+router.put("/:id/approve-kepala", authMiddleware, roleCheck("kepala_bidang"), approveByKepalaBidang);
+router.put("/:id/reject-kepala", authMiddleware, roleCheck("kepala_bidang"), rejectByKepalaBidang);
+
+// Direktur approve/reject
+router.put("/:id/approve-direktur", authMiddleware, roleCheck("direktur_sdm"), approveByDirektur);
+router.put("/:id/reject-direktur", authMiddleware, roleCheck("direktur_sdm"), rejectByDirektur);
 
 module.exports = router;
