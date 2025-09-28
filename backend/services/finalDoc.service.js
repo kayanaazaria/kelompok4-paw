@@ -3,6 +3,7 @@ const Report   = require('../models/Report');
 const Approval = require('../models/Approval');
 const PDFDocument = require('pdfkit');
 const QRCode = require('qrcode');
+const { mapReportFromAPI } = require('./finalDoc.adapter');
 
 // DB UTILITIES
 async function getReportByCode(code) {
@@ -36,13 +37,47 @@ function inferStatusFromFlow(flow = []) {
   return 'DRAFT';
 }
 
+function signflowFromReportStatus(status) {
+  const flow = [
+    { step: 1, role: 'HSE',           status: 'APPROVED' },
+    { step: 2, role: 'KEPALA_BIDANG', status: 'PENDING' },
+    { step: 3, role: 'DIREKTUR_SDM',  status: 'PENDING' },
+  ];
+
+  switch (status) {
+    case 'Menunggu Persetujuan Direktur SDM':
+      flow[1].status = 'APPROVED';
+      break;
+    case 'Disetujui':
+      flow[1].status = 'APPROVED';
+      flow[2].status = 'APPROVED';
+      break;
+    case 'Ditolak Kepala Bidang':
+      flow[1].status = 'REJECTED';
+      break;
+    case 'Ditolak Direktur SDM':
+      flow[1].status = 'APPROVED';
+      flow[2].status = 'REJECTED';
+      break;
+    case 'Draft':
+      flow[0].status = 'PENDING';
+      break;
+  }
+
+  return flow;
+}
+
 // Ambil history final: report + signFlow + status terhitung
 async function getHistoryByCode(code) {
   const report = await getReportByCode(code);
   if (!report) return null;
+
   const approvals = await getApprovalsByReportId(report._id);
-  const signFlow  = signflowFromApprovals(approvals);
-  const status    = report.status || inferStatusFromFlow(signFlow);
+  const signFlow  = approvals.length > 0 
+    ? signflowFromApprovals(approvals) 
+    : signflowFromReportStatus(report.status);
+
+  const status = report.status || inferStatusFromFlow(signFlow);
   return { id: report.code, status, report, signFlow };
 }
 
@@ -78,7 +113,7 @@ async function buildFinalPdf(data) {
       .text(`Tanggal      : ${fmtID(report.date)}`)
       .text(`Departemen   : ${report.department || '-'}`)
       .text(`Nama Pekerja : ${report.employeeName || '-'}`)
-      .text(`NIP          : ${report.employeeNip || report.nip || '-'}`)
+      .text(`NIP          : ${report.nip || '-'}`)
       .text(`Skala Cedera : ${report.injuryScale || '-'}`)
       .moveDown()
       .text('Deskripsi:', { underline: true })
@@ -106,9 +141,32 @@ async function buildFinalPdf(data) {
   });
 }
 
+// Ambil history final berdasarkan _id (ObjectId dari laporan)
+async function getHistoryById(id) {
+  const laporan = await Report.findById(id).lean();
+  if (!laporan) return null;
+
+  // mapping field ke format finaldoc
+  const report = mapReportFromAPI(laporan);
+
+  // kalau ada approvals terpisah
+  const approvals = await getApprovalsByReportId(report._id);
+  let signFlow = [];
+  if (approvals.length > 0) {
+    signFlow = signflowFromApprovals(approvals);
+  } else {
+    // fallback → derive dari status string
+    signFlow = signflowFromReportStatus(report.status);
+  }
+
+  const status = report.status || inferStatusFromFlow(signFlow);
+  return { id: report.code, status, report, signFlow };
+}
+
 module.exports = {
   // DB helpers
   getHistoryByCode,
+  getHistoryById,
   signflowFromApprovals,
   inferStatusFromFlow,
 
