@@ -4,7 +4,7 @@ const sendEmail = require("../utils/sendEmail");
 
 // Endpoint GET untuk cek server jalan
 router.get("/", (req, res) => {
-  res.json({ message: "Test route OK ✅" });
+  res.json({ message: "Test route OK!" });
 });
 
 // Endpoint GET untuk uji kirim email

@@ -37,7 +37,7 @@ const submitLaporan = async (req, res) => {
     laporan.isDraft = false;
     await laporan.save();
 
-    // 📩 Kirim notif ke Kabid & Direktur
+    // Kirim notif ke Kabid & Direktur
     const kabids = await User.find({ role: "kepala_bidang" });
     const direkturs = await User.find({ role: "direktur_sdm" });
     const recipients = [...kabids, ...direkturs].map((u) => u.email);
@@ -64,21 +64,6 @@ Silakan login ke sistem untuk approve/tolak.`
   }
 };
 
-// Ambil semua laporan
-const getAllLaporan = async (req, res) => {
-  try {
-    const laporan = await Laporan.find()
-      .populate("createdByHSE", "username email role")
-      .populate("signedByKabid", "username email role")
-      .populate("approvedByDirektur", "username email role");
-
-    res.json(laporan);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Gagal mengambil laporan" });
-  }
-};
-
 // Ambil detail laporan by ID
 const getLaporanById = async (req, res) => {
   try {
@@ -98,14 +83,37 @@ const getLaporanById = async (req, res) => {
   }
 };
 
-// Filter laporan berdasarkan status
+// Filter laporan berdasarkan status (dimodifikasi untuk handle semua kasus)
 const getLaporanByStatus = async (req, res) => {
   try {
     const { status } = req.query;
-    const laporan = await Laporan.find({ status })
+    let filter = {};
+    
+    // Jika ada parameter status
+    if (status) {
+      if (status === 'all') {
+        // Jika status = 'all', ambil semua laporan (tidak ada filter)
+        filter = {};
+      } else if (status === 'draft') {
+        filter.status = "Draft";
+      } else if (status === 'mengajukan') {
+        filter.status = { $in: ["Menunggu Persetujuan Kepala Bidang", "Menunggu Persetujuan Direktur SDM"] };
+      } else if (status === 'disetujui') {
+        filter.status = "Disetujui";
+      } else if (status === 'ditolak') {
+        filter.status = { $in: ["Ditolak Kepala Bidang", "Ditolak Direktur SDM"] };
+      } else {
+        // Jika status spesifik (exact match)
+        filter.status = status;
+      }
+    }
+    // Jika tidak ada parameter status, ambil semua laporan
+
+    const laporan = await Laporan.find(filter)
       .populate("createdByHSE", "username email role")
       .populate("signedByKabid", "username email role")
-      .populate("approvedByDirektur", "username email role");
+      .populate("approvedByDirektur", "username email role")
+      .sort({ createdAt: -1 }); // Sort terbaru dulu
 
     res.json(laporan);
   } catch (error) {
@@ -136,109 +144,29 @@ const trackLaporanHSE = async (req, res) => {
   }
 };
 
-// Approve Kepala Bidang + notif ke HSE & Direktur
-const approveByKepalaBidang = async (req, res) => {
+// Search laporan berdasarkan nama dokumen
+const searchDocs = async (req, res) => {
   try {
-    const laporan = await Laporan.findById(req.params.id).populate("createdByHSE", "email username");
-    if (!laporan) return res.status(404).json({ message: "Laporan tidak ditemukan" });
+    const { query } = req.query;
+    if (!query) {
+      return res.status(400).json({ message: "Query kosong" });
+    }
 
-    laporan.status = "Menunggu Persetujuan Direktur SDM";
-    laporan.signedByKabid = req.user._id;
-    await laporan.save();
+    const laporan = await Laporan.find({
+      nama_dokumen: { $regex: query, $options: "i" } // case-insensitive
+    });
 
-    // 📩 Notif ke HSE + Direktur
-    const direkturs = await User.find({ role: "direktur_sdm" });
-    const recipients = [laporan.createdByHSE.email, ...direkturs.map((u) => u.email)];
-
-    await sendEmail(
-      recipients.join(","),
-      "Laporan Disetujui Kepala Bidang",
-      `Halo,\n\nLaporan kecelakaan dari ${laporan.namaPekerja} sudah disetujui Kepala Bidang.\n\nMenunggu persetujuan Direktur SDM.`
-    );
-
-    res.json({ message: "Laporan disetujui Kepala Bidang", laporan });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Gagal approve laporan" });
-  }
-};
-
-// Reject Kepala Bidang + notif ke HSE
-const rejectByKepalaBidang = async (req, res) => {
-  try {
-    const laporan = await Laporan.findById(req.params.id).populate("createdByHSE", "email username");
-    if (!laporan) return res.status(404).json({ message: "Laporan tidak ditemukan" });
-
-    laporan.status = "Ditolak Kepala Bidang";
-    await laporan.save();
-
-    await sendEmail(
-      laporan.createdByHSE.email,
-      "Laporan Ditolak Kepala Bidang",
-      `Halo ${laporan.createdByHSE.username},\n\nLaporan kecelakaan anda ditolak oleh Kepala Bidang.`
-    );
-
-    res.json({ message: "Laporan ditolak Kepala Bidang", laporan });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Gagal reject laporan" });
-  }
-};
-
-// Approve Direktur SDM + notif ke HSE
-const approveByDirektur = async (req, res) => {
-  try {
-    const laporan = await Laporan.findById(req.params.id).populate("createdByHSE", "email username");
-    if (!laporan) return res.status(404).json({ message: "Laporan tidak ditemukan" });
-
-    laporan.status = "Disetujui";
-    laporan.approvedByDirektur = req.user._id;
-    await laporan.save();
-
-    await sendEmail(
-      laporan.createdByHSE.email,
-      "Laporan Disetujui Direktur SDM",
-      `Halo ${laporan.createdByHSE.username},\n\nLaporan kecelakaan anda sudah disetujui oleh Direktur SDM.`
-    );
-
-    res.json({ message: "Laporan disetujui Direktur SDM", laporan });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Gagal approve laporan" });
-  }
-};
-
-// Reject Direktur SDM + notif ke HSE
-const rejectByDirektur = async (req, res) => {
-  try {
-    const laporan = await Laporan.findById(req.params.id).populate("createdByHSE", "email username");
-    if (!laporan) return res.status(404).json({ message: "Laporan tidak ditemukan" });
-
-    laporan.status = "Ditolak Direktur SDM";
-    await laporan.save();
-
-    await sendEmail(
-      laporan.createdByHSE.email,
-      "Laporan Ditolak Direktur SDM",
-      `Halo ${laporan.createdByHSE.username},\n\nLaporan kecelakaan anda ditolak oleh Direktur SDM.`
-    );
-
-    res.json({ message: "Laporan ditolak Direktur SDM", laporan });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Gagal reject laporan" });
+    res.json(laporan);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
 
 module.exports = {
   createLaporan,
   submitLaporan,
-  getAllLaporan,
   getLaporanById,
   getLaporanByStatus,
   trackLaporanHSE,
-  approveByKepalaBidang,
-  rejectByKepalaBidang,
-  approveByDirektur,
-  rejectByDirektur,
+  searchDocs
 };

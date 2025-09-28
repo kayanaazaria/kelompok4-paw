@@ -4,15 +4,19 @@ const { authMiddleware, roleCheck } = require("../middleware/auth");
 const {
   createLaporan,
   submitLaporan,
-  getAllLaporan,
   getLaporanById,
   getLaporanByStatus,
   trackLaporanHSE,
+  searchDocs
+} = require("../controllers/laporanController");
+
+// Import approval functions from separate controller
+const {
   approveByKepalaBidang,
   rejectByKepalaBidang,
   approveByDirektur,
-  rejectByDirektur,
-} = require("../controllers/laporanController");
+  rejectByDirektur
+} = require("../controllers/laporanApprovalController");
 
 //
 // ========================= HSE ROUTES =========================
@@ -31,12 +35,13 @@ router.get("/hse/tracking", authMiddleware, roleCheck("hse"), trackLaporanHSE);
 // ========================= PUBLIC ROUTES =========================
 //
 
-// Semua user bisa filter laporan berdasarkan status
-// contoh: GET /api/laporan/status/filter?status=Disetujui
-router.get("/status/filter", authMiddleware, getLaporanByStatus);
+// Semua user bisa search laporan berdasarkan nama dokumen
+// contoh: GET /api/laporan/search?query=insiden
+router.get("/search", authMiddleware, searchDocs);
 
-// Semua user bisa lihat semua laporan
-router.get("/", authMiddleware, getAllLaporan);
+// Semua user bisa filter laporan berdasarkan status atau ambil semua
+// contoh: GET /api/laporan?status=Disetujui atau GET /api/laporan?status=all atau GET /api/laporan (default semua)
+router.get("/", authMiddleware, getLaporanByStatus);
 
 // Semua user bisa lihat detail laporan by ID
 router.get("/:id", authMiddleware, getLaporanById);

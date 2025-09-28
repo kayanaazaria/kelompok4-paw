@@ -16,9 +16,9 @@ const sendEmail = async (to, subject, text) => {
       subject,
       text
     });
-    console.log(`✅ Email terkirim ke ${to}`);
+    console.log(`Email terkirim ke ${to}`);
   } catch (err) {
-    console.error("❌ Gagal kirim email:", err.message);
+    console.error("Gagal kirim email:", err.message);
   }
 };
 
