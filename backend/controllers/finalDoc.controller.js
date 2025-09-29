@@ -31,7 +31,6 @@ async function listReports(_req, res, next) {
   } catch (e) { next(e); }
 }
 
-// GET /finaldoc/reports/:id/history (pakai ObjectId)
 async function getHistoryByIdHandler(req, res, next) {
   try {
     const { id } = req.params;
@@ -45,7 +44,6 @@ async function getHistoryByIdHandler(req, res, next) {
   } catch (e) { next(e); }
 }
 
-// GET /finaldoc/reports/:id/final.pdf
 async function getFinalPdfById(req, res, next) {
   try {
     const { id } = req.params;
@@ -59,7 +57,6 @@ async function getFinalPdfById(req, res, next) {
   } catch (e) { next(e); }
 }
 
-// GET /finaldoc/reports/:id/final/download
 async function downloadFinalPdfById(req, res, next) {
   try {
     const { id } = req.params;
@@ -73,7 +70,6 @@ async function downloadFinalPdfById(req, res, next) {
   } catch (e) { next(e); }
 }
 
-// GET /finaldoc/reports/:id/verify
 async function verifyPageById(req, res, next) {
   try {
     const { id } = req.params;
