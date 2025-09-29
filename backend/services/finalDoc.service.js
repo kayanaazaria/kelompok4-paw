@@ -1,17 +1,14 @@
-// backend/services/finalDoc.service.js
 const Report   = require('../models/Report');
 const Approval = require('../models/Approval');
 const PDFDocument = require('pdfkit');
 const QRCode = require('qrcode');
 const { mapReportFromAPI } = require('./finalDoc.adapter');
 
-// DB UTILITIES
 async function getReportByCode(code) {
   return Report.findOne({ code }).lean();
 }
 
 async function getApprovalsByReportId(reportId) {
-  // sekarang pakai relasi by reportId (ObjectId)
   return Approval.find({ reportId }).sort({ step: 1 }).lean();
 }
 
@@ -67,7 +64,6 @@ function signflowFromReportStatus(status) {
   return flow;
 }
 
-// Ambil history final: report + signFlow + status terhitung
 async function getHistoryByCode(code) {
   const report = await getReportByCode(code);
   if (!report) return null;
@@ -81,81 +77,90 @@ async function getHistoryByCode(code) {
   return { id: report.code, status, report, signFlow };
 }
 
-// PDF
-// formater tanggal sederhana
 function fmtID(d) {
   if (!d) return '-';
   const dt = new Date(d);
   return dt.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-// Membuat PDF final dan mengembalikan { pdfBuffer }
 async function buildFinalPdf(data) {
-  // Normalisasi field agar robust ke 2 bentuk input
-  const report = data.report || data;
+  const report   = data.report   || data;
   const signFlow = data.signFlow || report.signFlow || [];
-  const qrLink = data.qrLink || report.qrLink || 'http://localhost/';
+  const qrLink   = data.qrLink   || report.qrLink   || 'http://localhost/';
 
   const doc = new PDFDocument({ size: 'A4', margin: 50 });
 
-  // kumpulkan buffer
+  const divider = () => { doc.moveTo(50, doc.y).lineTo(550, doc.y).strokeColor('#cccccc').stroke().moveDown(0.8).strokeColor('black'); };
+  const labelVal = (label, val) => {
+    doc.font('Helvetica-Bold').text(label, { continued: true });
+    doc.font('Helvetica').text(` ${val ?? '-'}`);
+  };
+
   const chunks = [];
   return new Promise(async (resolve, reject) => {
-    doc.on('data', c => chunks.push(c));
+    doc.on('data', (c) => chunks.push(c));
     doc.on('error', reject);
     doc.on('end', () => resolve({ pdfBuffer: Buffer.concat(chunks) }));
 
-    // Judul
-    doc.fontSize(18).text('Laporan Kecelakaan Kerja', { align: 'center' }).moveDown();
+    doc.font('Helvetica-Bold')
+       .fontSize(18)
+       .text('LAPORAN KECELAKAAN KERJA', { align: 'center' })
+       .moveDown(1.2);
 
-    // Identitas
-    doc.fontSize(12)
-      .text(`Tanggal      : ${fmtID(report.date)}`)
-      .text(`Departemen   : ${report.department || '-'}`)
-      .text(`Nama Pekerja : ${report.employeeName || '-'}`)
-      .text(`NIP          : ${report.nip || '-'}`)
-      .text(`Skala Cedera : ${report.injuryScale || '-'}`)
-      .moveDown()
-      .text('Deskripsi:', { underline: true })
-      .text(report.description || '-', { align: 'left' })
-      .moveDown()
-      .text('Alur Tanda Tangan:', { underline: true });
+    divider();
 
-    signFlow.forEach(s => {
+    doc.fontSize(12);
+    labelVal('Tanggal:', fmtID(report.date));
+    labelVal('Departemen:', report.department || '-');
+    labelVal('Nama Pekerja:', report.employeeName || '-');
+    labelVal('NIP:', report.nip || '-');
+    labelVal('Skala Cedera:', (report.injuryScale || '-').toString().toLowerCase()); // biar “berat/ringan” terlihat konsisten
+    doc.moveDown(0.8);
+
+    doc.font('Helvetica-Bold').text('Deskripsi:');
+    doc.font('Helvetica').text(report.description || '-', { align: 'justify' });
+    doc.moveDown(0.8);
+
+    divider();
+
+    doc.font('Helvetica-Bold').text('Alur Tanda Tangan:').moveDown(0.2);
+    doc.font('Helvetica');
+
+    signFlow.forEach((s) => {
       const when = s.at ? ` (${fmtID(s.at)})` : '';
-      doc.text(`• Step ${s.step} - ${s.role}: ${s.status}${when}${s.userName ? `, oleh ${s.userName}` : ''}`);
+      const who  = s.userName ? `, oleh ${s.userName}` : '';
+      doc.text(`• Step ${s.step} — ${s.role}: ${s.status}${when}${who}`);
     });
 
-    // QR Code
+    doc.moveDown(0.8);
+    divider();
+
     try {
       const dataUrl = await QRCode.toDataURL(qrLink);
       const base64  = dataUrl.replace(/^data:image\/png;base64,/, '');
-      doc.moveDown().text('Scan QR untuk verifikasi dokumen:');
+      doc.font('Helvetica-Bold').text('Scan QR untuk verifikasi dokumen:').moveDown(0.2);
       doc.image(Buffer.from(base64, 'base64'), { width: 120 });
-      doc.fillColor('gray').fontSize(9).text(qrLink, { align: 'left' }).fillColor('black');
-    } catch (_) {
-      // kalau QR gagal, tetap lanjutkan PDF
+      doc.moveDown(0.4);
+      doc.fillColor('gray').font('Helvetica').fontSize(9).text(qrLink, { align: 'left' }).fillColor('black');
+    } catch {
+      doc.font('Helvetica').text('QR tidak tersedia.');
     }
 
     doc.end();
   });
 }
 
-// Ambil history final berdasarkan _id (ObjectId dari laporan)
 async function getHistoryById(id) {
   const laporan = await Report.findById(id).lean();
   if (!laporan) return null;
 
-  // mapping field ke format finaldoc
   const report = mapReportFromAPI(laporan);
 
-  // kalau ada approvals terpisah
   const approvals = await getApprovalsByReportId(report._id);
   let signFlow = [];
   if (approvals.length > 0) {
     signFlow = signflowFromApprovals(approvals);
   } else {
-    // fallback → derive dari status string
     signFlow = signflowFromReportStatus(report.status);
   }
 
@@ -164,12 +169,10 @@ async function getHistoryById(id) {
 }
 
 module.exports = {
-  // DB helpers
   getHistoryByCode,
   getHistoryById,
   signflowFromApprovals,
   inferStatusFromFlow,
 
-  // PDF
   buildFinalPdf,
 };
