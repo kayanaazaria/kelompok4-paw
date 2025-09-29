@@ -17,7 +17,6 @@ const {
   approveByDirektur,
   rejectByDirektur,
 } = require("../controllers/laporanController");
-const { get } = require("http");
 
 //
 // ========================= HSE ROUTES =========================
@@ -57,21 +56,21 @@ router.delete("/:id", authMiddleware, roleCheck("hse"), deleteLaporan);
 // HSE submit laporan dari Draft → Menunggu Kabid
 router.put("/:id/submit", authMiddleware, roleCheck("hse"), submitLaporan);
 
-// HSE tracking laporan (draft, menunggu, selesai)
-router.get("/hse/tracking", authMiddleware, roleCheck("hse"), trackLaporanHSE);
-
 //
 // ========================= PUBLIC ROUTES =========================
 //
 
-// Semua user bisa filter laporan berdasarkan status
+// Semua user bisa filter laporan berdasarkan status (SPECIFIC ROUTES FIRST)
 // contoh: GET /api/laporan/status/filter?status=Disetujui
 router.get("/status/filter", authMiddleware, getLaporanByStatus);
+
+// HSE tracking laporan (draft, menunggu, selesai) - MOVED HERE TO AVOID CONFLICT
+router.get("/hse/tracking", authMiddleware, roleCheck("hse"), trackLaporanHSE);
 
 // Semua user bisa lihat semua laporan
 router.get("/", authMiddleware, getAllLaporan);
 
-// Semua user bisa lihat detail laporan by ID
+// Semua user bisa lihat detail laporan by ID (DYNAMIC ROUTE LAST)
 router.get("/:id", authMiddleware, getLaporanById);
 
 //
