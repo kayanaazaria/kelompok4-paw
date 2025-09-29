@@ -1,15 +1,19 @@
-const { Schema, model } = require('mongoose');
+const mongoose = require('mongoose');
 
-const reportSchema = new Schema({
-  code: { type: String, unique: true, index: true }, // ex: RPT-001
-  date: Date,
-  department: { type: String, enum: ['Mechanical Assembly','Electronical Assembly','Software Installation','Quality Assurance','Warehouse'] },
-  employeeName: String,
-  nip: String,
-  injuryScale: { type: String, enum: ['RINGAN','MENENGAH','BERAT'] },
-  description: String,
-  status: { type: String, enum: ['DRAFT','MENUNGGU_APPROVAL','SELESAI','REJECTED'], default: 'MENUNGGU_APPROVAL' },
-  attachments: [String],
-}, { timestamps: true });
+const ReportSchema = new mongoose.Schema(
+  {},
+  {
+    strict: false,
+    collection: 'reports',
+    timestamps: false, 
+  }
+);
 
-module.exports = model('Report', reportSchema);
+ReportSchema.virtual('code').get(function () {
+  return this._id?.toString();
+});
+
+ReportSchema.set('toJSON', { virtuals: true });
+ReportSchema.set('toObject', { virtuals: true });
+
+module.exports = mongoose.model('Report', ReportSchema);
