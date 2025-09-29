@@ -1,21 +1,21 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-
-const DEPARTMENTS = [
-  'Mechanical Assembly',
-  'Electronical Assembly',
-  'Software Installation',
-  'Quality Assurance',
-  'Warehouse'
-];
+const { USER_ROLES, DEPARTMENTS } = require('../constants/enums');
 
 const UserSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  password: { 
+    type: String, 
+    required: function() {
+      return !this.googleId;
+    }
+  },
+  googleId: { type: String, sparse: true },
+  photo: String,
   role: {
     type: String,
-    enum: ['admin', 'hse', 'kepala_bidang', 'direktur_sdm'],
+    enum: Object.values(USER_ROLES),
     required: true
   },
   department: {
@@ -40,4 +40,4 @@ UserSchema.methods.matchPassword = async function (enteredPassword) {
 
 const User = mongoose.model('User', UserSchema);
 
-module.exports = User; // ✅ Export langsung User
+module.exports = User; 
