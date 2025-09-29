@@ -12,6 +12,8 @@ const {
   updateLaporan,
   deleteLaporan,
   trackLaporanHSE,
+  trackLaporanKepala,
+  trackLaporanDirektur,
   approveByKepalaBidang,
   rejectByKepalaBidang,
   approveByDirektur,
@@ -66,6 +68,12 @@ router.get("/status/filter", authMiddleware, getLaporanByStatus);
 
 // HSE tracking laporan (draft, menunggu, selesai) - MOVED HERE TO AVOID CONFLICT
 router.get("/hse/tracking", authMiddleware, roleCheck("hse"), trackLaporanHSE);
+
+// Kepala Bidang tracking laporan (yang sudah mereka approve/reject)
+router.get("/kepala/tracking", authMiddleware, roleCheck("kepala_bidang"), trackLaporanKepala);
+
+// Direktur SDM tracking laporan (yang sudah mereka approve/reject)  
+router.get("/direktur/tracking", authMiddleware, roleCheck("direktur_sdm"), trackLaporanDirektur);
 
 // Semua user bisa lihat semua laporan
 router.get("/", authMiddleware, getAllLaporan);

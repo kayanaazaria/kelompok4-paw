@@ -71,12 +71,12 @@ const submitLaporan = async (req, res) => {
     laporan.isDraft = false;
     await laporan.save();
 
-    // 📩 Kirim notif HANYA ke Kepala Bidang dari department terkait
+    // Kirim notif HANYA ke Kepala Bidang dari department terkait
     const kabids = await User.find({ 
       role: "kepala_bidang", 
-      department: laporan.department // ✅ Filter by department yang sama
+      department: laporan.department // Filter by department yang sama
     });
-    const recipients = kabids.map((u) => u.email); // ❌ Hapus direktur dari notifikasi submit
+    const recipients = kabids.map((u) => u.email); 
 
     if (recipients.length > 0) {
       await sendEmail(
@@ -182,15 +182,31 @@ const approveByKepalaBidang = async (req, res) => {
     laporan.signedByKabid = req.user._id;
     await laporan.save();
 
-    // 📩 Notif ke HSE + Direktur
+    // Kirim notifikasi terpisah untuk HSE dan Direktur SDM
     const direkturs = await User.find({ role: "direktur_sdm" });
-    const recipients = [laporan.createdByHSE.email, ...direkturs.map((u) => u.email)];
-
+    
+    // Email ke HSE - Status Update
     await sendEmail(
-      recipients.join(","),
-      "Laporan Disetujui Kepala Bidang",
-      `Halo,\n\nLaporan kecelakaan dari ${laporan.namaPekerja} sudah disetujui Kepala Bidang.\n\nMenunggu persetujuan Direktur SDM.`
+      laporan.createdByHSE.email,
+      "Status Update: Laporan Disetujui Kepala Bidang",
+      `Halo ${laporan.createdByHSE.username},\n\nLaporan kecelakaan anda telah disetujui oleh Kepala Bidang.\n\nStatus: Menunggu persetujuan Direktur SDM.\n\nAnda akan mendapat notifikasi lagi setelah keputusan final.`
     );
+
+    // Email ke Direktur SDM - Action Required  
+    if (direkturs.length > 0) {
+      const direkturEmails = direkturs.map((u) => u.email);
+      await sendEmail(
+        direkturEmails.join(","),
+        "Laporan Kecelakaan Butuh Persetujuan - Action Required",
+        `Halo,\n\nAda laporan kecelakaan yang sudah disetujui Kepala Bidang dan membutuhkan persetujuan Anda.
+Nama Pekerja : ${laporan.namaPekerja}
+Tanggal      : ${laporan.tanggalKejadian?.toDateString()}
+Departemen   : ${laporan.department}
+Skala Cedera : ${laporan.skalaCedera}
+
+Silakan login ke sistem untuk approve/tolak laporan ini.`
+      );
+    }
 
     res.json({ message: "Laporan disetujui Kepala Bidang", laporan });
   } catch (error) {
@@ -266,6 +282,53 @@ const rejectByDirektur = async (req, res) => {
   }
 };
 
+// Tracking laporan oleh Kepala Bidang (yang sudah mereka approve/reject)
+const trackLaporanKepala = async (req, res) => {
+  try {
+    const { status } = req.query;
+    let filter = { signedByKabid: req.user._id }; // Laporan yang sudah di-sign oleh kepala bidang ini
+
+    if (status === "approved") {
+      filter.status = { $in: ["Menunggu Persetujuan Direktur SDM", "Disetujui"] };
+    } else if (status === "rejected") {
+      filter.status = "Ditolak Kepala Bidang";
+    }
+    // Jika tidak ada status query, ambil semua yang pernah di-handle
+
+    const laporan = await Laporan.find(filter)
+      .populate("createdByHSE", "username email department")
+      .sort({ updatedAt: -1 });
+    res.json(laporan);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Gagal tracking laporan kepala bidang" });
+  }
+};
+
+// Tracking laporan oleh Direktur SDM (yang sudah mereka approve/reject)
+const trackLaporanDirektur = async (req, res) => {
+  try {
+    const { status } = req.query;
+    let filter = { approvedByDirektur: req.user._id }; // Laporan yang sudah di-approve/reject oleh direktur ini
+
+    if (status === "approved") {
+      filter.status = "Disetujui";
+    } else if (status === "rejected") {
+      filter.status = "Ditolak Direktur SDM";
+    }
+    // Jika tidak ada status query, ambil semua yang pernah di-handle
+
+    const laporan = await Laporan.find(filter)
+      .populate("createdByHSE", "username email department")
+      .populate("signedByKabid", "username email department")
+      .sort({ updatedAt: -1 });
+    res.json(laporan);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Gagal tracking laporan direktur" });
+  }
+};
+
 module.exports = {
   createLaporan,
   submitLaporan,
@@ -275,6 +338,8 @@ module.exports = {
   updateLaporan,
   deleteLaporan,
   trackLaporanHSE,
+  trackLaporanKepala,
+  trackLaporanDirektur,
   approveByKepalaBidang,
   rejectByKepalaBidang,
   approveByDirektur,
