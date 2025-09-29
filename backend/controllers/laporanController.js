@@ -71,10 +71,12 @@ const submitLaporan = async (req, res) => {
     laporan.isDraft = false;
     await laporan.save();
 
-    // 📩 Kirim notif ke Kabid & Direktur
-    const kabids = await User.find({ role: "kepala_bidang" });
-    const direkturs = await User.find({ role: "direktur_sdm" });
-    const recipients = [...kabids, ...direkturs].map((u) => u.email);
+    // 📩 Kirim notif HANYA ke Kepala Bidang dari department terkait
+    const kabids = await User.find({ 
+      role: "kepala_bidang", 
+      department: laporan.department // ✅ Filter by department yang sama
+    });
+    const recipients = kabids.map((u) => u.email); // ❌ Hapus direktur dari notifikasi submit
 
     if (recipients.length > 0) {
       await sendEmail(
