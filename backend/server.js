@@ -9,12 +9,12 @@ const passport = require('./config/passport');
 connectDB();
 const app = express();
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 
 app.use(express.json());
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'dev_secret',
+  secret: process.env.SESSION_SECRET || 'rahasia_session_kamu',
   resave: false,
   saveUninitialized: false,
 }));
