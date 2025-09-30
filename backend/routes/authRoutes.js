@@ -2,7 +2,13 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
-const { registerUser, loginUser } = require('../controllers/authController');
+const { 
+  registerUser, 
+  loginUser, 
+  logoutUser, 
+  logoutGoogleUser, 
+  universalLogout 
+} = require('../controllers/authController');
 const { authMiddleware, roleCheck } = require('../middleware/auth');
 
 // Endpoint untuk register (hanya admin)
@@ -10,6 +16,17 @@ router.post('/register', authMiddleware, roleCheck('admin'), registerUser);
 
 // Endpoint untuk login
 router.post('/login', loginUser);
+
+// ================== LOGOUT ENDPOINTS ==================
+
+// Logout untuk JWT token (client-side logout)
+router.post('/logout', authMiddleware, logoutUser);
+
+// Logout untuk Google OAuth (server-side session logout)
+router.post('/logout/google', logoutGoogleUser);
+
+// Universal logout (auto-detect login type dan logout accordingly)
+router.post('/logout/universal', universalLogout);
 
 // Endpoint untuk Google OAuth - tanpa middleware auth
 router.get('/google', 
