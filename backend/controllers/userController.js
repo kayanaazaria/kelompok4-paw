@@ -1,4 +1,4 @@
-const { User } = require('../models/userModel'); // ✅ perbaikan import
+const User = require('../models/userModel');
 
 // Create user (khusus admin)
 const createUser = async (req, res, next) => {
