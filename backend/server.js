@@ -65,6 +65,7 @@ const userRoutes = require('./routes/userRoutes');
 const laporanRoutes = require('./routes/laporan');
 const notificationRoutes = require('./routes/notificationRoutes');
 const approvalRoutes = require('./routes/approvalRoutes');
+const finalDocumentRoutes = require('./routes/finalDocumentRoutes');
 const diagnosticsRoutes = require('./routes/testRoutes');
 
 // ROUTE TEST EMAIL
@@ -80,6 +81,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/laporan', laporanRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/approvals', approvalRoutes);
+app.use('/finaldoc', finalDocumentRoutes);
 // Diagnostics (token / blacklist debug) - keep last
 app.use('/api/diag', diagnosticsRoutes);
 
