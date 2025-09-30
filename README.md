@@ -12,7 +12,7 @@ Digitalisasi Sistem Laporan Kecelakaan Solanum Agrotech (US1)
 5. Kayana Anindya Azaria (23/521475/TK/57528)
 
 ## Deskripsi Aplikasi
-Aplikasi ini dikembangkan untuk mendigitalisasi proses pelaporan kecelakaan kerja di Solanum Agrotech. Dengan sistem ini, seluruh proses mulai dari pembuatan laporan oleh HSE, approval oleh Kepala Bidang, hingga persetujuan akhir Direktur SDM dapat dilakukan secara terintegrasi, aman, dan terdokumentasi dengan baik. Aplikasi web ini dibuat untuk menghindari kehilangan dokumen ataupun dokumen tercecer.
+Aplikasi ini dikembangkan untuk mendigitalisasi proses pelaporan kecelakaan kerja di Solanum Agrotech. Dengan sistem ini, seluruh proses mulai dari pembuatan laporan oleh HSE, approval oleh Kepala Bidang, hingga persetujuan akhir Direktur SDM dapat dilakukan secara terintegrasi, aman, dan terdokumentasi dengan baik. Aplikasi web ini dibuat untuk menghindari kehilangan dokumen karena tercecer atau terbuang.
 Fitur utama meliputi:
 - Registrasi & Login Multi-Role (Admin, HSE, Kepala Bidang, Direktur SDM).
 - Pembuatan & Pengajuan Laporan Kecelakaan oleh HSE.
@@ -24,6 +24,57 @@ Fitur utama meliputi:
 - Manajemen data terintegrasi dengan MongoDB.
 
 ## Struktur Folder dan File
+
+```
+kelompok4-paw/
+├─ README.md
+├─ .gitignore
+├─ .env
+└─ backend/
+	├─ config/
+	│  ├─ dbConnection.js       
+	│  └─ passport.js           
+	├─ constants/
+    │  └─ enums.js
+    ├─ controllers/
+    │  ├─ approvalController.js
+	│  ├─ authController.js
+    │  ├─ finalDocumentController.js
+	│  ├─ laporanController.js  
+	│  ├─ notificationController.js
+	│  └─ userController.js
+	├─ middleware/
+	│  ├─ auth.js
+    │  ├─ constants.js               
+	│  └─ errorHandler.js
+	├─ models/
+    │  ├─ approvalModel.js
+    │  ├─ BlacklistedToken.js
+    │  ├─ LaporanKecelakaan.js
+	│  ├─ notificationModel.js   
+	│  └─ userModel.js
+	├─ node_modules/
+	├─ routes/
+    │  ├─ approvalRoutes.js
+	│  ├─ authRoutes.js
+    │  ├─ finalDocumentRoutes.js
+    │  ├─ laporan.js
+    │  ├─ notificationRoutes.js
+    │  ├─ testEmail.js
+	│  ├─ testRoutes.js            
+	│  └─ userRoutes.js         
+	├─ services/
+	│  └─ finalDocument.service.js
+    ├─ uploads/   
+	├─ utils/
+    │  ├─ emailService.js
+    │  ├─ errorUtils.js
+	│  ├─ jwtBlacklist.js       
+	│  └─ sendEmail.js               
+	├─ package-lock.json
+    ├─ package.json         
+	└─ server.js            
+```
 
 
 ## Teknologi yang Digunakan Selama Pengembangan
@@ -37,8 +88,15 @@ Fitur utama meliputi:
 - File Upload: Multer (untuk upload attachment laporan)
 - Version Control: Git + GitHub
 - Testing API: Postman
+- Auth & Session (Login via Google OAuth2): passport-google-oauth20
+- PDF Generator: PDFKit
+- QR Code: qrcode
+- Environment: dotenv
 
 ## URL Google Drive Laporan
+Link dokumentasi & laporan akhir dapat diakses di:
+
+https://drive.google.com/drive/folders/1Jd9orTNhqVqH9QuLWimp3WsCcNGWvOC0?usp=sharing
 
 
 ## 👥 Pembagian Kontribusi Anggota
