@@ -19,3 +19,7 @@ Thumbs.db
 
 # Editor files
 .vscode/
+
+# Next.js
+.next/
+out/
