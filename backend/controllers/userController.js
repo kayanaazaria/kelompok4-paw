@@ -9,6 +9,11 @@ const createUser = async (req, res, next) => {
       return next(new Error('Silahkan isi bagian yang belum diisi'));
     }
 
+    if (password.length < 8) {
+      res.status(400);
+      return next(new Error('Password harus minimal 8 karakter.'));
+    }
+
     const userExists = await User.findOne({ $or: [{ email }, { username }] });
     if (userExists) {
       res.status(400);
