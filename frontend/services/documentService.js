@@ -10,8 +10,21 @@ api.interceptors.request.use(config => {
   let token = null;
 
   if (typeof window !== 'undefined') {
-    token = localStorage.getItem('jwt_token'); 
+    token = localStorage.getItem('token') || 
+            localStorage.getItem('jwt_token') || 
+            localStorage.getItem('authToken');
+    
+    if (!token) {
+      const userData = localStorage.getItem('userData');
+      if (userData) {
+        try {
+          const parsed = JSON.parse(userData);
+          token = parsed.token;
+        } catch (e) {}
+      }
+    }
   }
+  
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -27,9 +40,21 @@ export const getFinalDocuments = async () => {
 
 export const downloadFinalDocument = async (documentId) => {
     try {
-        const fullDownloadUrl = `http://localhost:5001/finaldoc/laporan/${documentId}/download`;
+        const fullDownloadUrl = `http://localhost:5001/api/finaldoc/laporan/${documentId}/download`;
         
-        const token = localStorage.getItem('jwt_token');
+        let token = localStorage.getItem('token') || 
+                    localStorage.getItem('jwt_token') || 
+                    localStorage.getItem('authToken');
+        
+        if (!token) {
+            const userData = localStorage.getItem('userData');
+            if (userData) {
+                try {
+                  const parsed = JSON.parse(userData);
+                  token = parsed.token;
+                } catch (e) {}
+            }
+        }
 
         if (!token) {
              throw new Error("Token otorisasi tidak ditemukan.");
@@ -63,6 +88,46 @@ export const downloadFinalDocument = async (documentId) => {
     } catch (error) {
         console.error("Gagal mengunduh dokumen:", error);
         alert("Gagal mengunduh dokumen. Otorisasi mungkin ditolak atau file tidak ada.");
+    }
+};
+
+export const getAllHSEDocuments = async () => {
+    const response = await api.get('/laporan'); 
+    return response.data;
+};
+
+export const viewFinalDocument = async (documentId) => {
+    try {
+        const fullViewUrl = `http://localhost:5001/api/finaldoc/laporan/${documentId}`;
+        
+        let token = localStorage.getItem('token') || 
+                    localStorage.getItem('jwt_token') || 
+                    localStorage.getItem('authToken');
+        
+        if (!token) {
+            const userData = localStorage.getItem('userData');
+            if (userData) {
+                try {
+                  const parsed = JSON.parse(userData);
+                  token = parsed.token;
+                } catch (e) {}
+            }
+        }
+
+        if (!token) {
+             throw new Error("Token otorisasi tidak ditemukan.");
+        }
+
+        const response = await axios.get(fullViewUrl, {
+            headers: {
+                Authorization: `Bearer ${token}` 
+            }
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error("Gagal mengambil dokumen final:", error);
+        throw error;
     }
 };
 

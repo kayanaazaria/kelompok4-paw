@@ -1,10 +1,10 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/userModel'); // ✅ Import langsung User
+const User = require('../models/userModel');
 const { blacklistToken, isTokenBlacklisted } = require('../utils/jwtBlacklist');
 
 const generateToken = (id, role, username) => {
-  return jwt.sign({ id, role, username }, process.env.JWT_SECRET, { expiresIn: '1d' });
+  return jwt.sign({ id, role, username }, process.env.JWT_SECRET, { expiresIn: '7d' });
 };
 
 const registerUser = async (req, res, next) => {
