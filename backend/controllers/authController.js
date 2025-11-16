@@ -62,7 +62,7 @@ const loginUser = async (req, res, next) => {
 const logoutUser = async (req, res) => {
   try {
     const token = req.token; // Dari authMiddleware
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     if (token) {
       // Blacklist token di server
