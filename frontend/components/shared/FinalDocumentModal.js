@@ -1,8 +1,28 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { XCircle, Eye } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import QRCodeLib from 'qrcode';
+import Image from 'next/image';
+
+const CanvasQRCode = ({ url, id }) => {
+    const canvasRef = useRef(null);
+
+    useEffect(() => {
+        if (canvasRef.current) {
+            QRCodeLib.toCanvas(canvasRef.current, url, {
+                errorCorrectionLevel: 'H', 
+                width: 128, 
+                margin: 1, 
+            }, function (error) {
+                if (error) console.error('Gagal membuat QR Code:', error);
+            });
+        }
+    }, [url]);
+
+    return <canvas ref={canvasRef} id={id} />;
+};
 
 const getInnerIcon = (state) => {
     if (state === 'done') {
@@ -38,6 +58,8 @@ const FinalDocumentModal = ({ isOpen, onClose, documentData, approvalSteps, getS
     if (!isOpen) return null;
 
     const router = useRouter();
+    const documentId = documentData._id || 'ID_NOT_FOUND';
+    const verificationUrl = `${window.location.origin}/verify/${documentId}`;
 
     const getTimelineColor = (state) => {
         switch(state) {
@@ -49,37 +71,49 @@ const FinalDocumentModal = ({ isOpen, onClose, documentData, approvalSteps, getS
     };
 
     const handleVerifyClick = () => {
-        if (documentData._id) {
-            router.push(`/verify/${documentData._id}`);
-            onClose();
+        if (documentId && documentId !== 'ID_NOT_FOUND') {
+            router.push(`/verify/${documentId}`);
+            onClose(); 
         } else {
             alert("ID Dokumen tidak ditemukan untuk verifikasi.");
         }
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4" onClick={onClose}>
+        <div className="fixed inset-0 bg-white bg-opacity-20 flex justify-center items-center z-50 p-4" onClick={onClose}>
             <div 
-                className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header Modal */}
-                <div className="flex justify-between items-center border-b p-4 sticky top-0 bg-white z-10">
+                <div className="relative flex justify-center items-center border-b p-4 sticky top-0 bg-white z-20">
+                    
                     <h2 className="text-xl font-semibold text-gray-800">Dokumen Final Laporan Insiden</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+                    
+                    <button 
+                        onClick={onClose} 
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
                         <XCircle size={24} />
                     </button>
                 </div>
 
                 {/* Body Konten Modal */}
                 <div className="p-6">
-                    <p className="text-sm text-gray-600 mb-6">Dokumen ini merupakan versi final dari laporan insiden kerja yang telah disetujui.</p>
+                    <p className="text-center text-sm text-gray-600 mb-6">Dokumen ini merupakan versi final dari laporan insiden kerja yang telah disetujui.</p>
 
                     {/* Bagian Detail Dokumen Final */}
                     <div>
                         <div className="text-center mb-6">
-                            <h3 className="text-xl font-bold text-gray-900">SOLANUM AGROTECH</h3>
-                            <p className="text-lg font-semibold text-gray-700">LAPORAN INSIDEN KERJA</p>
+                            <div className="relative mx-auto mb-4" style={{ width: '120px', height: '120px' }}>
+                                <Image 
+                                    src="/logo_solanum_vertical.png" 
+                                    alt="SOLANUM AGROTECH Logo" 
+                                    fill
+                                    className="object-contain"
+                                />
+                            </div>
+                            <p className="text-2xl font-bold text-gray-900 leading-tight">LAPORAN INSIDEN KERJA</p>
                         </div>
 
                         {/* Tabel Detail Informasi */}
@@ -87,7 +121,7 @@ const FinalDocumentModal = ({ isOpen, onClose, documentData, approvalSteps, getS
                             <table className="w-full text-left text-gray-700">
                                 <tbody>
                                     <tr className="border-b border-gray-100">
-                                        <td className="py-3 px-4 font-normal w-2/5 text-gray-600">Tanggal Insiden</td>
+                                        <td className="py-3 px-4 font-normal w-1/4 text-gray-600">Tanggal Insiden</td>
                                         <td className="py-3 px-4 font-semibold">
                                             {new Date(documentData.tanggalKejadian).toLocaleDateString('id-ID')}
                                         </td>
@@ -164,14 +198,20 @@ const FinalDocumentModal = ({ isOpen, onClose, documentData, approvalSteps, getS
                         </div>
 
                         {/* QR Code dan Verifikasi */}
-                        <div className="text-center border-t border-gray-100 pt-6 mt-6">
+                        <div className="text-center border-t border-gray-100 pt-6 mt-6 bg-white">
                             <p className="text-sm font-medium text-gray-700 mb-4">Scan QR Code untuk verifikasi dokumen</p>
                             
-                            <div className="inline-block p-4 border border-gray-300 rounded-lg mb-4 bg-white shadow-sm">
-                                
+                            <div className="inline-block p-2 border border-gray-300 rounded-lg mb-4 bg-white shadow-sm">
+                                {documentId !== 'ID_NOT_FOUND' ? (
+                                    <CanvasQRCode url={verificationUrl} id="qr-code-canvas" />
+                                ) : (
+                                    <div style={{ width: 128, height: 128, backgroundColor: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        ID Error
+                                    </div>
+                                )}
                             </div>
                             
-                            <p className="text-xs text-gray-500 mb-4">(IDC - 2025 - 0012)</p>
+                            <p className="text-xs text-gray-500 mb-4">(ID Dokumen: {documentId})</p>
 
                             {/* Tombol Verifikasi */}
                             <button 
