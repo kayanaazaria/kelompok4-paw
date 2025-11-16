@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { XCircle, Eye } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const getInnerIcon = (state) => {
     if (state === 'done') {
@@ -36,12 +37,23 @@ const getInnerIcon = (state) => {
 const FinalDocumentModal = ({ isOpen, onClose, documentData, approvalSteps, getStepState }) => {
     if (!isOpen) return null;
 
+    const router = useRouter();
+
     const getTimelineColor = (state) => {
         switch(state) {
             case 'done': return 'bg-green-600';
             case 'current': return 'bg-yellow-400';
             case 'rejected': return 'bg-red-500';
             default: return 'bg-gray-400';
+        }
+    };
+
+    const handleVerifyClick = () => {
+        if (documentData._id) {
+            router.push(`/verify/${documentData._id}`);
+            onClose();
+        } else {
+            alert("ID Dokumen tidak ditemukan untuk verifikasi.");
         }
     };
 
@@ -156,11 +168,19 @@ const FinalDocumentModal = ({ isOpen, onClose, documentData, approvalSteps, getS
                             <p className="text-sm font-medium text-gray-700 mb-4">Scan QR Code untuk verifikasi dokumen</p>
                             
                             <div className="inline-block p-4 border border-gray-300 rounded-lg mb-4 bg-white shadow-sm">
-                                                            </div>
+                                
+                            </div>
                             
-                            <button className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition flex items-center justify-center mx-auto gap-2">
+                            <p className="text-xs text-gray-500 mb-4">(IDC - 2025 - 0012)</p>
+
+                            {/* Tombol Verifikasi */}
+                            <button 
+                                onClick={handleVerifyClick} 
+                                className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition flex items-center justify-center mx-auto gap-2"
+                            >
                                 <Eye size={20} /> Lihat Verifikasi Dokumen
                             </button>
+                            
                             <p className="text-xs text-gray-500 mt-4 text-gray-500">
                                 Dokumen ini dihasilkan secara otomatis oleh sistem <br/> SOLANUM AGROTECH - Incident Report Management System
                             </p>
