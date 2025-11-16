@@ -5,7 +5,10 @@
 # Frontend
 /frontend/node_modules
 /frontend/.env
+/frontend/.env.local
 /frontend/build
+
+node_modules/
 
 # Logs
 *.log
@@ -23,3 +26,4 @@ Thumbs.db
 # Next.js
 .next/
 out/
+dist/
