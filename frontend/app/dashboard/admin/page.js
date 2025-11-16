@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getDecodedToken, getRoleRoute, getRoleStatus } from '@/utils/auth';
 import { Navbar, SearchBar, ErrorAlert, DeleteConfirmModal } from '@/components/shared';
-import { UserModal, UserList, PageHeader, UserStats } from '@/components/admin';
+import { UserModal, UserList, PageHeader } from '@/components/admin';
 import { useUserManagement } from '@/hooks/useUserManagement';
 import { useRoleHelpers } from '@/hooks/useRoleHelpers';
 
@@ -102,8 +102,6 @@ export default function AdminDashboardPage() {
           currentUser={currentUser}
           users={users}
         />
-
-        <UserStats totalUsers={users.length} />
       </div>
 
       {/* Modal Dialog */}
