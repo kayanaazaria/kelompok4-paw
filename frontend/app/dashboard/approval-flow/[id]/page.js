@@ -8,6 +8,7 @@ import api from '@/services/documentService';
 import { ArrowLeft, CheckCircle, AlertCircle, XCircle, Eye, Download, ChevronDown, LogOut, FileEdit } from 'lucide-react';
 import Image from 'next/image';
 import { Poppins } from 'next/font/google';
+import FinalDocumentModal from '@/components/shared/FinalDocumentModal';
 
 const poppins = Poppins({ 
     subsets: ['latin'],
@@ -112,6 +113,9 @@ export default function ApprovalFlowPage({ params }) {
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isFinalDocModalOpen, setIsFinalDocModalOpen] = useState(false);
+    const handleOpenFinalDocModal = () => setIsFinalDocModalOpen(true);
+    const handleCloseFinalDocModal = () => setIsFinalDocModalOpen(false);
 
     useEffect(() => {
         const token = localStorage.getItem('token') || 
@@ -445,9 +449,7 @@ export default function ApprovalFlowPage({ params }) {
                                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Dokumen Final</h3>
                                 <div className="space-y-3">
                                     <button 
-                                        onClick={() => {
-                                            window.open(`http://localhost:5001/finaldoc/laporan/${stableDocumentId}`, '_blank');
-                                        }} 
+                                        onClick={handleOpenFinalDocModal} 
                                         className="w-full border-2 border-blue-500 text-blue-600 p-4 rounded-lg hover:bg-blue-50 transition font-semibold flex items-center justify-center gap-2"
                                     >
                                         <Eye size={20} /> Lihat Dokumen Final
@@ -548,6 +550,17 @@ export default function ApprovalFlowPage({ params }) {
                                 )}
                             </div>
                         </div>
+
+                        {/* Modal Dokumen Final */}
+                        {documentData && documentData.status === 'Disetujui' && (
+                            <FinalDocumentModal
+                                isOpen={isFinalDocModalOpen}
+                                onClose={handleCloseFinalDocModal}
+                                documentData={documentData}
+                                approvalSteps={approvalSteps}
+                                getStepState={getStepState}
+                            />
+                        )}
                     </>
                 )}
             </div>
