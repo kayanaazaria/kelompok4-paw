@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { LogOut, Save, Send, Edit, Trash2, CheckCircle, XCircle, Clock, FileText, Upload, Folder, Loader2 } from 'lucide-react';
+import { LogOut, Save, Send, Edit, Trash2, CheckCircle, XCircle, FileText, Upload, Loader2, XCircle as CancelIcon } from 'lucide-react';
 import axios from 'axios';
 
 // --- Global Constants (Based on Mongoose Schema) ---
@@ -68,9 +68,11 @@ const getFakeReport = () => ({
 
 // --- LAYANAN API (Didefinisikan di sini untuk self-contained code) ---
 
-const API_BASE_URL = 'http://localhost:5000/api/laporan'; 
+// Catatan: Port diubah menjadi 5001 sesuai setting di prompt sebelumnya.
+const API_BASE_URL = 'http://localhost:5001/api/laporan'; 
 
 const getAuthHeaders = () => {
+    // Menggunakan token dummy yang valid (asumsi user adalah HSE)
     const token = localStorage.getItem('authToken') || 'FAKE_JWT_TOKEN_FOR_DEMO'; 
     return {
         headers: {
@@ -115,16 +117,6 @@ const submitLaporanAPI = async (laporanId) => {
 
 const getLaporanDetail = async (laporanId) => {
     const response = await axios.get(`${API_BASE_URL}/${laporanId}`, getAuthHeaders());
-    return response.data;
-};
-
-// >>> FUNGSI API BARU UNTUK TRACKING HSE <<<
-const trackLaporanHSEAPI = async (statusFilter) => {
-    // statusFilter: 'draft', 'menunggu', 'selesai'
-    const response = await axios.get(
-        `${API_BASE_URL}/hse/tracking?status=${statusFilter}`, 
-        getAuthHeaders()
-    );
     return response.data;
 };
 
@@ -432,14 +424,15 @@ const LaporanForm = ({ report, handleChange, handleSubmit, handleAttachmentChang
                 {/* Footer Aksi */}
                 <Card className="fixed bottom-0 left-0 right-0 z-20 rounded-t-xl rounded-b-none shadow-2xl lg:shadow-none lg:relative lg:mt-8">
                     <div className="flex justify-end space-x-4">
+                        {/* Batal kini mengarah ke Form Baru (sebagai fallback) */}
                         {isEdit && (
                             <button
                                 type="button"
                                 className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition duration-150 text-sm font-semibold"
-                                onClick={() => setView('list')}
+                                onClick={() => setView('form')}
                                 disabled={isLoading}
                             >
-                                <XCircle size={18} className="inline mr-2" /> Batal
+                                <CancelIcon size={18} className="inline mr-2" /> Batal
                             </button>
                         )}
                         <button
@@ -465,179 +458,24 @@ const LaporanForm = ({ report, handleChange, handleSubmit, handleAttachmentChang
     );
 };
 
-// --- KOMPONEN BARU: DAFTAR LAPORAN (HSE TRACKING) ---
-
-const LaporanList = ({ setView, setReportId, isLoading, setIsLoading, reportList, currentStatus, setCurrentStatus, fetchLaporanList }) => {
-    
-    useEffect(() => {
-        // Ambil data setiap kali status tab berubah
-        fetchLaporanList(currentStatus);
-    }, [currentStatus, fetchLaporanList]);
-
-    const tabs = [
-        { key: 'draft', name: 'Draft' },
-        { key: 'menunggu', name: 'Menunggu Persetujuan' },
-        { key: 'selesai', name: 'Selesai/Ditolak' },
-    ];
-
-    const getStatusBadge = (status) => {
-        let color = 'bg-gray-200 text-gray-700';
-        if (status.includes('Menunggu')) color = 'bg-yellow-100 text-yellow-700';
-        if (status.includes('Disetujui')) color = 'bg-green-100 text-green-700';
-        if (status.includes('Ditolak')) color = 'bg-red-100 text-red-700';
-        if (status === 'Draft') color = 'bg-blue-100 text-blue-700';
-        return <span className={`text-xs font-medium px-2 py-1 rounded-full ${color}`}>{status}</span>;
-    };
-
-    const handleEditClick = (id) => {
-        setReportId(id); // Simpan ID laporan yang akan diedit
-        setView('edit'); // Pindah ke tampilan edit
-    };
-
-    return (
-        <div className="min-h-screen bg-gray-50 pb-20">
-            <Header title="Tracking Laporan Kecelakaan HSE" />
-            <div className="w-full px-4 sm:px-6 lg:px-8 mt-8">
-                
-                <div className="flex justify-between items-center mb-6">
-                    <button 
-                        className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-800 font-semibold"
-                        onClick={() => setView('form')}
-                    >
-                        <FileText size={16} /> Buat Laporan Baru
-                    </button>
-                    <button 
-                        className="text-gray-500 hover:text-gray-700 transition"
-                        onClick={() => fetchLaporanList(currentStatus)}
-                        disabled={isLoading}
-                        title="Refresh Data"
-                    >
-                        <Loader2 size={20} className={isLoading ? 'animate-spin' : ''} />
-                    </button>
-                </div>
-
-                <div className="mb-8 border-b border-gray-200">
-                    <nav className="flex space-x-4 overflow-x-auto pb-2 -mb-px">
-                        {tabs.map(tab => (
-                            <button
-                                key={tab.key}
-                                onClick={() => setCurrentStatus(tab.key)}
-                                className={`
-                                    py-2 px-3 sm:px-4 text-sm font-medium transition duration-150 rounded-t-lg
-                                    ${currentStatus === tab.key
-                                        ? 'border-b-4 border-blue-600 text-blue-600'
-                                        : 'text-gray-500 hover:text-gray-700 hover:border-b-2 hover:border-gray-300'
-                                    }
-                                `}
-                            >
-                                {tab.name}
-                            </button>
-                        ))}
-                    </nav>
-                </div>
-
-                {isLoading ? (
-                    <div className="text-center p-10 text-gray-500 flex flex-col items-center">
-                        <Loader2 size={32} className="animate-spin mb-3 text-blue-500" />
-                        Memuat Laporan...
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        {reportList.length > 0 ? (
-                            reportList.map(report => (
-                                <Card key={report._id} className="p-4 sm:p-6 hover:shadow-xl transition duration-300">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-gray-900 truncate">
-                                                Insiden {report.namaPekerja} - ({report.department})
-                                            </h3>
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                ID Laporan: {report._id} | Tanggal: {report.tanggalKejadian}
-                                            </p>
-                                        </div>
-                                        {getStatusBadge(report.status)}
-                                    </div>
-                                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                                        **Detail:** {report.detailKejadian}
-                                    </p>
-                                    <div className="flex justify-end">
-                                        <button 
-                                            className="flex items-center space-x-1 text-sm text-blue-600 hover:text-blue-800 font-medium transition"
-                                            onClick={() => handleEditClick(report._id)}
-                                        >
-                                            <Edit size={16} /> Lihat Detail & Edit
-                                        </button>
-                                    </div>
-                                </Card>
-                            ))
-                        ) : (
-                            <div className="text-center p-10 bg-white rounded-xl shadow-lg border border-dashed text-gray-500">
-                                <Folder size={32} className="mx-auto mb-3" />
-                                Tidak ada laporan dalam status **{tabs.find(t => t.key === currentStatus).name}**.
-                            </div>
-                        )}
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-};
-
 
 // --- MAIN APP COMPONENT ---
 
 const App = () => {
     const [report, setReport] = useState(getDefaultReport());
-    // View: 'form', 'edit', 'list'
-    const [view, setView] = useState('list'); 
+    // Default view diubah menjadi 'form' karena tidak ada 'list'
+    const [view, setView] = useState('form'); 
     const [attachmentFile, setAttachmentFile] = useState(null); 
     const [isLoading, setIsLoading] = useState(false);
     
-    // State untuk List View
-    const [reportList, setReportList] = useState([]);
-    const [currentStatus, setCurrentStatus] = useState('menunggu'); // Default tab
-
-    // Simulasi set ID laporan saat beralih dari List ke Edit
-    const setReportId = useCallback((id) => {
-        // Dalam aplikasi nyata, ID ini akan digunakan dalam fetchData
-        setReport(prev => ({ ...prev, _id: id })); 
-    }, []);
-
-    // >>> FUNGSI FETCH REPORT LIST (untuk List View) <<<
-    const fetchLaporanList = useCallback(async (status) => {
-        setIsLoading(true);
-        try {
-            // Panggil API tracking
-            // const data = await trackLaporanHSEAPI(status);
-            
-            // --- SIMULASI DATA LIST karena API tidak nyata ---
-            let data = [];
-            if (status === 'draft') {
-                 data = [{...getFakeReport(), _id: 'd1', status: 'Draft', isDraft: true, namaPekerja: 'Ani Draft' }];
-            } else if (status === 'menunggu') {
-                 data = [{...getFakeReport(), _id: 'm1', status: 'Menunggu Persetujuan Kepala Bidang', namaPekerja: 'Budi Menunggu'}];
-            } else if (status === 'selesai') {
-                 data = [{...getFakeReport(), _id: 's1', status: 'Disetujui', namaPekerja: 'Caca Disetujui'}];
-                 data.push({...getFakeReport(), _id: 's2', status: 'Ditolak Direktur SDM', namaPekerja: 'Didi Ditolak'});
-            }
-            // --------------------------------------------------
-
-            setReportList(data);
-        } catch (error) {
-            console.error('Error fetching list:', error);
-            setReportList([]); // Kosongkan jika gagal
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
-
+    // List-related states (reportList, currentStatus) dan handlers (setReportId, fetchLaporanList) dihapus
 
     // Mengambil data detail laporan saat beralih ke Edit View
     const fetchData = useCallback(async (id) => {
         setIsLoading(true);
         try {
             if (id) {
-                // Gunakan getLaporanDetail(id) di sini
+                // Dalam aplikasi nyata: const data = await getLaporanDetail(id);
                 const data = getFakeReport(); // Simulasi
                 setReport({ 
                     ...data,
@@ -650,6 +488,7 @@ const App = () => {
             }
         } catch (error) {
             console.error('Error fetching report:', error);
+            // Fallback ke data palsu jika API gagal
             setReport(getFakeReport());
         } finally {
             setIsLoading(false);
@@ -658,13 +497,14 @@ const App = () => {
 
     useEffect(() => {
         if (view === 'edit') {
+            // Kita harus menentukan ID, jadi gunakan ID palsu untuk demo edit
             const idToFetch = report._id || getFakeReport()._id; 
             fetchData(idToFetch);
         } else if (view === 'form') {
             setReport(getDefaultReport());
             setAttachmentFile(null);
         }
-        // Jika view === 'list', fetching dikelola oleh LaporanList component
+        // Logika untuk 'list' telah dihapus
     }, [view, fetchData, report._id]);
 
 
@@ -696,25 +536,26 @@ const App = () => {
             if (report._id) {
                 reportToSave.status = isDraft ? report.status : 'Menunggu Persetujuan Kepala Bidang';
                 
-                // Gunakan updateLaporanData di sini
+                // --- API CALL SIMULATION START ---
                 // response = await updateLaporanData(report._id, reportToSave, attachmentFile);
-                response = { laporan: getFakeReport(), message: 'Simulasi Update OK' }; // Simulasi
+                response = { laporan: { ...reportToSave, _id: report._id }, message: 'Simulasi Update OK' }; // Simulasi
                 
                 if (!isDraft && report.isDraft) {
                     // response = await submitLaporanAPI(report._id);
-                    response = { laporan: {...getFakeReport(), isDraft: false, status: 'Menunggu Persetujuan Kepala Bidang'}, message: 'Simulasi Submit OK' }; // Simulasi
+                    response = { laporan: {...reportToSave, isDraft: false, status: 'Menunggu Persetujuan Kepala Bidang'}, message: 'Simulasi Submit OK' }; // Simulasi
                 }
 
             } else {
                 reportToSave.status = 'Draft';
                 
-                // Gunakan createLaporanDraft di sini
                 // response = await createLaporanDraft(reportToSave, attachmentFile);
-                 response = { _id: 'laporan_new_123', ...reportToSave, message: 'Simulasi Create OK' }; // Simulasi
+                response = { _id: 'laporan_new_123', ...reportToSave, message: 'Simulasi Create OK' }; // Simulasi
             }
+            // --- API CALL SIMULATION END ---
             
             console.log('API Success:', response);
             setReport(response.laporan || response); 
+            // Setelah submit/simpan, pindah ke mode edit untuk laporan yang baru/diedit
             setView('edit'); 
 
             const action = isDraft ? 'Draft disimpan' : 'Laporan dikirim';
@@ -733,38 +574,23 @@ const App = () => {
 
     // --- Logika Render untuk Tampilan Utama ---
     let CurrentView;
-    if (view === 'list') {
-        CurrentView = (
-            <LaporanList
-                setView={setView}
-                setReportId={setReportId}
-                isLoading={isLoading}
-                setIsLoading={setIsLoading}
-                reportList={reportList}
-                currentStatus={currentStatus}
-                setCurrentStatus={setCurrentStatus}
-                fetchLaporanList={fetchLaporanList}
-            />
-        );
-    } else if (view === 'form' || view === 'edit') {
-        CurrentView = (
-            <LaporanForm
-                report={report}
-                handleChange={handleChange}
-                handleSubmit={handleSubmit}
-                handleAttachmentChange={handleAttachmentChange}
-                mode={view}
-                setView={setView}
-                isLoading={isLoading}
-            />
-        );
-    }
+    // Hanya ada 'form' dan 'edit'
+    CurrentView = (
+        <LaporanForm
+            report={report}
+            handleChange={handleChange}
+            handleSubmit={handleSubmit}
+            handleAttachmentChange={handleAttachmentChange}
+            mode={view}
+            setView={setView}
+            isLoading={isLoading}
+        />
+    );
 
-    // Tombol Navigasi Demo
+    // Tombol Navigasi Demo Disederhanakan
     const DemoNav = () => (
         <div className="fixed top-20 right-4 z-50 p-2 bg-blue-600 rounded-lg shadow-xl flex flex-col space-y-2 text-xs">
             <h3 className='text-white font-bold text-center'>Tampilan Demo</h3>
-            <button className="bg-white px-3 py-1 rounded text-blue-600 hover:bg-gray-200" onClick={() => setView('list')}>Daftar Laporan</button>
             <button className="bg-white px-3 py-1 rounded text-blue-600 hover:bg-gray-200" onClick={() => setView('form')}>+ Laporan Baru</button> 
             <button className="bg-white px-3 py-1 rounded text-blue-600 hover:bg-gray-200" onClick={() => setView('edit')}>Edit Laporan</button> 
         </div>
