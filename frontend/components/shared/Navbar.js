@@ -1,14 +1,30 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { ChevronDown, LogOut } from 'lucide-react';
-import { clearSession } from '@/utils/auth';
+import { clearSession, getCurrentUser } from '@/utils/auth';
 
-export default function Navbar({ currentUser, formatRole }) {
+const formatRole = (role) => {
+  const roleMap = {
+    admin: 'Admin',
+    hse: 'HSE',
+    kepala_bidang: 'Kepala Bidang',
+    direktur_sdm: 'Direktur SDM'
+  };
+  return roleMap[role] || role;
+};
+
+export default function Navbar() {
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const user = getCurrentUser();
+    setCurrentUser(user);
+  }, []);
 
   const handleLogout = () => {
     clearSession();

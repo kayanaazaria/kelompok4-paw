@@ -32,7 +32,10 @@ export const getStoredToken = () => {
 export const clearSession = () => {
   if (typeof window === 'undefined') return;
   const keysToRemove = [...TOKEN_KEYS, 'userData'];
-  keysToRemove.forEach((key) => window.localStorage.removeItem(key));
+  keysToRemove.forEach((key) => {
+    window.localStorage.removeItem(key);
+    window.sessionStorage.removeItem(key);
+  });
 };
 
 export const getDecodedToken = () => {
@@ -52,13 +55,48 @@ export const getRoleRoute = (role) => {
 
 export const storeAuthSession = (payload) => {
   if (typeof window === 'undefined' || !payload) return;
-  const { token, role, username, email } = payload;
+  const { token, role, username, email, department } = payload;
   if (token) {
     window.localStorage.setItem('token', token);
     window.localStorage.setItem('jwt_token', token);
     window.localStorage.setItem('authToken', token);
   }
-  window.localStorage.setItem('userData', JSON.stringify({ role, username, email, token }));
+  window.localStorage.setItem('userData', JSON.stringify({ role, username, email, department, token }));
+  window.sessionStorage.setItem('token', token);
+  window.sessionStorage.setItem('userData', JSON.stringify({ role, username, email, department }));
+};
+
+export const getCurrentUser = () => {
+  if (typeof window === 'undefined') return null;
+  
+  // Try session storage first
+  const sessionData = window.sessionStorage.getItem('userData');
+  if (sessionData) {
+    try {
+      return JSON.parse(sessionData);
+    } catch (error) {}
+  }
+  
+  // Fallback to localStorage
+  const localData = window.localStorage.getItem('userData');
+  if (localData) {
+    try {
+      return JSON.parse(localData);
+    } catch (error) {}
+  }
+  
+  // Fallback to decoded token
+  const decoded = getDecodedToken();
+  if (decoded) {
+    return {
+      username: decoded.username,
+      email: decoded.email,
+      role: decoded.role,
+      department: decoded.department
+    };
+  }
+  
+  return null;
 };
 
 export const getRoleStatus = (allowedRoles = []) => {
