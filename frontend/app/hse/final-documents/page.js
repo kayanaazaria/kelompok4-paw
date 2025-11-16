@@ -3,10 +3,10 @@
 import { getFinalDocuments, downloadFinalDocument, viewFinalDocument, getAllHSEDocuments } from '@/services/documentService'; 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { jwtDecode } from 'jwt-decode';
 import { CircleCheck, FileText, Clock, XCircle, Search, ChevronDown, Eye, Plus, Shield, LineChart, LogOut, FileDown, Eye as EyeIcon } from 'lucide-react';
 import Image from 'next/image';
 import { Poppins } from 'next/font/google'; 
+import { getDecodedToken, getRoleRoute, getRoleStatus } from '@/utils/auth';
 
 const poppins = Poppins({ 
     subsets: ['latin'],
@@ -110,26 +110,17 @@ const useHSEDashboard = () => {
     const [filterStatus, setFilterStatus] = useState('Semua Status');
 
     useEffect(() => {
-        const token = localStorage.getItem('token') || 
-                      localStorage.getItem('jwt_token') || 
-                      localStorage.getItem('authToken');
-        if (token) {
-            try {
-                const decoded = jwtDecode(token);
-                if (decoded.role !== 'hse') {
-                    alert('Akses Ditolak. Silakan login sebagai role HSE.');
-                    router.push('/');
-                    return;
-                }
-                setUser(decoded);
-            } catch (e) {
-                console.error("Invalid token:", e);
-                router.push('/');
-                return;
-            }
-        } else {
-            router.push('/');
+        const { status: roleStatus, role } = getRoleStatus(['hse']);
+        if (roleStatus !== 'authorized') {
+            const fallback = roleStatus === 'unauthorized' ? '/login' : getRoleRoute(role);
+            router.replace(fallback);
+            setLoading(false);
             return;
+        }
+
+        const decoded = getDecodedToken();
+        if (decoded) {
+            setUser(decoded);
         }
 
         async function fetchDocuments() {

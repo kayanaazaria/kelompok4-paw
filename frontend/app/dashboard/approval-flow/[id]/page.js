@@ -2,12 +2,12 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { jwtDecode } from 'jwt-decode';
 import { downloadFinalDocument } from '@/services/documentService'; 
 import api from '@/services/documentService'; 
 import { ArrowLeft, CheckCircle, AlertCircle, XCircle, Eye, Download, ChevronDown, LogOut, FileEdit } from 'lucide-react';
 import Image from 'next/image';
 import { Poppins } from 'next/font/google';
+import { getDecodedToken, getRoleRoute, getRoleStatus } from '@/utils/auth';
 
 const poppins = Poppins({ 
     subsets: ['latin'],
@@ -79,26 +79,11 @@ const Header = ({ user, onLogout }) => {
     );
 };
 
+const ALLOWED_ROLES = ['kepala_bidang', 'direktur_sdm', 'hse'];
+
 function checkUserRole() {
-    if (typeof window === 'undefined') return { status: 'loading' }; 
-
-    const token = localStorage.getItem('token') || 
-                  localStorage.getItem('jwt_token') || 
-                  localStorage.getItem('authToken');
-    if (!token) return { status: 'unauthorized' }; 
-
-    try {
-        const decoded = jwtDecode(token);
-        const role = decoded.role;
-        
-        if (role === 'kepala_bidang' || role === 'direktur_sdm' || role === 'hse') {
-            return { status: 'authorized', role };
-        } else {
-            return { status: 'forbidden', role };
-        }
-    } catch (e) {
-        return { status: 'unauthorized' };
-    }
+    if (typeof window === 'undefined') return { status: 'loading' };
+    return getRoleStatus(ALLOWED_ROLES);
 }
 
 export default function ApprovalFlowPage({ params }) {
@@ -114,17 +99,9 @@ export default function ApprovalFlowPage({ params }) {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const token = localStorage.getItem('token') || 
-                      localStorage.getItem('jwt_token') || 
-                      localStorage.getItem('authToken');
-        
-        if (token) {
-            try {
-                const decoded = jwtDecode(token);
-                setUserData(decoded);
-            } catch (e) {
-                console.error("Invalid token:", e);
-            }
+        const decoded = getDecodedToken();
+        if (decoded) {
+            setUserData(decoded);
         }
     }, []);
 
@@ -149,7 +126,8 @@ export default function ApprovalFlowPage({ params }) {
         } else if (roleStatus !== 'loading') {
             setLoading(false);
             if (roleStatus === 'unauthorized' || roleStatus === 'forbidden') {
-                router.push('/'); 
+                const fallback = roleStatus === 'unauthorized' ? '/login' : getRoleRoute(userRole);
+                router.replace(fallback);
             }
         }
     }, [roleStatus, router, currentDocumentId]); 

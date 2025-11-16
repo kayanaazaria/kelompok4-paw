@@ -3,8 +3,12 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const { blacklistToken, isTokenBlacklisted } = require('../utils/jwtBlacklist');
 
-const generateToken = (id, role, username) => {
-  return jwt.sign({ id, role, username }, process.env.JWT_SECRET, { expiresIn: '7d' });
+const generateToken = (id, role, username, email, department = null) => {
+  const payload = { id, role, username, email };
+  if (department) {
+    payload.department = department;
+  }
+  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
 };
 
 const registerUser = async (req, res, next) => {
@@ -29,7 +33,8 @@ const registerUser = async (req, res, next) => {
         username: user.username,
         email: user.email,
         role: user.role,
-        token: generateToken(user._id, user.role, user.username)
+        department: user.department,
+        token: generateToken(user._id, user.role, user.username, user.email, user.department)
       });
     }
   } catch (err) {
@@ -47,7 +52,8 @@ const loginUser = async (req, res, next) => {
         username: user.username,
         email: user.email,
         role: user.role,
-        token: generateToken(user._id, user.role, user.username)
+        department: user.department,
+        token: generateToken(user._id, user.role, user.username, user.email, user.department)
       });
     } else {
       res.status(401);

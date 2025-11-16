@@ -54,30 +54,31 @@ router.get('/google/callback', (req, res, next) => {
   }, (err, user, info) => {
     if (err) {
       console.error('Google Auth Error:', err);
-      return res.status(500).json({ error: err.message });
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      return res.redirect(`${frontendUrl}/auth/google/callback?error=${encodeURIComponent(err.message)}`);
     }
     
     if (!user) {
-      return res.status(401).json({ error: 'Authentication failed' });
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      return res.redirect(`${frontendUrl}/auth/google/callback?error=${encodeURIComponent('Authentication failed')}`);
     }
 
     // Generate JWT token
     const token = jwt.sign(
-      { id: user._id, role: user.role || 'user', username: user.email },
+      { 
+        id: user._id, 
+        role: user.role || 'user', 
+        username: user.username || user.email.split('@')[0], 
+        email: user.email,
+        department: user.department
+      },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
 
-    // Return token in response
-    res.json({
-      token,
-      user: {
-        _id: user._id,
-        email: user.email,
-        role: user.role || 'user',
-        username: user.email
-      }
-    });
+    // Redirect ke frontend callback dengan token
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    res.redirect(`${frontendUrl}/auth/google/callback?token=${token}`);
   })(req, res, next);
 });
 

@@ -85,8 +85,44 @@ const updateUserRoleAndDepartment = async (req, res, next) => {
   }
 };
 
+// Delete user
+const deleteUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      res.status(404);
+      return next(new Error('User tidak ditemukan'));
+    }
+
+    // Prevent deleting other admin users (only can delete self if admin)
+    if (user.role === 'admin' && user._id.toString() !== req.user._id.toString()) {
+      res.status(403);
+      return next(new Error('Tidak dapat menghapus admin lain'));
+    }
+
+    // If deleting own account and is admin, check if last admin
+    if (user._id.toString() === req.user._id.toString() && user.role === 'admin') {
+      const adminCount = await User.countDocuments({ role: 'admin' });
+      
+      if (adminCount <= 1) {
+        res.status(403);
+        return next(new Error('Tidak dapat menghapus diri sendiri karena Anda adalah admin terakhir'));
+      }
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+
+    return res.json({ message: 'User berhasil dihapus' });
+
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   createUser,
   getAllUsers,
-  updateUserRoleAndDepartment
+  updateUserRoleAndDepartment,
+  deleteUser
 };

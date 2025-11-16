@@ -54,13 +54,13 @@ passport.use(new GoogleStrategy(
       user.photo = profile.photos[0].value;
       
       // Jika user belum punya username, gunakan nama dari Google
-      if (!user.username) {
-        const baseUsername = profile.displayName.toLowerCase().replace(/\s+/g, '');
+      if (!user.username || user.username === user.email) {
+        const baseUsername = profile.displayName.toLowerCase().replace(/\s+/g, '_');
         user.username = baseUsername;
       }
       
       await user.save();
-      console.log('User updated successfully');
+      console.log('User updated successfully with username:', user.username);
       return done(null, user);
     } catch (error) {
       console.error('Error in Google Strategy:', error);
