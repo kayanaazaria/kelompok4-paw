@@ -164,14 +164,14 @@ const EditLaporanForm = ({
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            className="flex-1 px-4 sm:px-6 py-3 bg-white text-emerald-600 border-2 border-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors font-medium flex items-center justify-center gap-2 text-sm sm:text-base"
           >
             Batal
           </button>
           <button
             type="button"
             onClick={onSave}
-            className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="flex-1 px-4 sm:px-6 py-3 bg-emerald-600 text-white border-2 border-emerald-600 rounded-lg hover:bg-emerald-700 transition-colors font-medium text-sm sm:text-base"
           >
             Simpan Perubahan
           </button>

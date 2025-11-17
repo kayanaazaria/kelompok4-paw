@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import api, { API_BASE_URL } from "@/services/api";
 import { Navbar, ErrorAlert } from "@/components/shared";
 import { 
   LaporanHeader, 
@@ -13,9 +14,6 @@ import {
   EditLaporanForm 
 } from "@/components/hse/detail";
 import { ArrowLeft } from "lucide-react";
-import axios from "axios";
-
-const API_URL = "http://localhost:5001/api";
 
 export default function DetailLaporan() {
   const router = useRouter();
@@ -28,16 +26,11 @@ export default function DetailLaporan() {
   const [fileName, setFileName] = useState("");
   const [formErrors, setFormErrors] = useState({});
 
-  const getAuthHeaders = () => {
-    const token = sessionStorage.getItem("token");
-    return { headers: { Authorization: `Bearer ${token}` } };
-  };
-
   useEffect(() => {
     const fetchLaporan = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_URL}/laporan/${params.id}`, getAuthHeaders());
+        const response = await api.get(`${API_BASE_URL}/laporan/${params.id}`);
         setLaporan(response.data);
         setEditFormData({
           tanggalKejadian: response.data.tanggalKejadian?.split("T")[0] || "",
@@ -121,7 +114,7 @@ export default function DetailLaporan() {
         },
       };
 
-      await axios.put(`${API_URL}/laporan/${params.id}`, formDataToSend, config);
+      await api.put(`${API_BASE_URL}/laporan/${params.id}`, formDataToSend, config);
       window.location.reload();
     } catch (err) {
       setError(err.response?.data?.message || "Gagal mengupdate laporan");
@@ -132,8 +125,8 @@ export default function DetailLaporan() {
     if (window.confirm("Submit laporan untuk persetujuan?")) {
       try {
         const token = sessionStorage.getItem("token");
-        await axios.put(
-          `${API_URL}/laporan/${laporan._id}/submit`,
+        await api.put(
+          `${API_BASE_URL}/laporan/${laporan._id}/submit`,
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -181,7 +174,7 @@ export default function DetailLaporan() {
             onClick={() => router.push("/dashboard/hse")}
             className="mt-4 text-emerald-600 hover:text-emerald-700 flex items-center gap-2"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft size={20} />
             Kembali ke Dashboard
           </button>
         </div>
@@ -200,7 +193,7 @@ export default function DetailLaporan() {
             onClick={() => router.push("/dashboard/hse")}
             className="mb-4 sm:mb-6 text-gray-600 hover:text-gray-900 flex items-center gap-2 transition-colors text-sm sm:text-base"
           >
-            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+            <ArrowLeft size={20} />
             <span className="font-medium">Kembali ke Dashboard</span>
           </button>
 

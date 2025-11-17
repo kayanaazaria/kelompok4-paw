@@ -51,7 +51,7 @@ export default function DetailLaporanDirektur() {
       setActionLoading(true);
       setError(null);
       await api.put(
-        `/api/laporan/${params.id}/approve-direktur`
+        `${API_BASE_URL}/laporan/${params.id}/approve-direktur`
       );
       alert("Laporan berhasil disetujui");
       router.push("/dashboard/direktur-sdm");
@@ -72,7 +72,7 @@ export default function DetailLaporanDirektur() {
       setActionLoading(true);
       setError(null);
       await api.put(
-        `/api/laporan/${params.id}/reject-direktur`,
+        `${API_BASE_URL}/laporan/${params.id}/reject-direktur`,
         { alasanPenolakan: rejectionReason }
       );
       alert("Laporan berhasil ditolak");
@@ -89,8 +89,10 @@ export default function DetailLaporanDirektur() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
-        <div className="flex items-center justify-center h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+          </div>
         </div>
       </div>
     );
@@ -107,7 +109,7 @@ export default function DetailLaporanDirektur() {
             className="mt-4 flex items-center gap-2 text-emerald-600 hover:text-emerald-700"
           >
             <ArrowLeft size={20} />
-            Kembali
+            Kembali ke Dashboard
           </button>
         </div>
       </div>
@@ -120,10 +122,11 @@ export default function DetailLaporanDirektur() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {/* Back Button */}
         <button
           onClick={() => router.push("/dashboard/direktur-sdm")}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+          className="mb-4 sm:mb-6 text-gray-600 hover:text-gray-900 flex items-center gap-2 transition-colors text-sm sm:text-base"
         >
           <ArrowLeft size={20} />
           <span className="font-medium">Kembali ke Dashboard</span>
@@ -131,18 +134,18 @@ export default function DetailLaporanDirektur() {
 
         {error && <ErrorAlert message={error} />}
 
+        {/* Header Component */}
         <LaporanHeader laporan={laporan} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-          <div className="lg:col-span-2 space-y-6">
-            <LaporanInfo laporan={laporan} />
-            <DetailKejadian laporan={laporan} />
-            {laporan.attachment && <LampiranSection laporan={laporan} />}
-          </div>
+        {/* Main Content */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <LaporanInfo laporan={laporan} />
+          <DetailKejadian detailKejadian={laporan.detailKejadian} />
+          <LampiranSection attachmentUrl={laporan.attachmentUrl} />
+          <ApprovalInfo laporan={laporan} />
+        </div>
 
           <div className="space-y-6">
-            <ApprovalInfo laporan={laporan} />
-            
             {canTakeAction && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">Aksi Persetujuan</h3>
@@ -190,7 +193,7 @@ export default function DetailLaporanDirektur() {
               </div>
             )}
           </div>
-        </div>
+
       </div>
 
       {/* Reject Modal */}
