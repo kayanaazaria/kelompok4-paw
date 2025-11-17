@@ -35,20 +35,16 @@ export default function Navbar() {
     <div className="bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 lg:h-20">
-          {/* Logo and Title */}
-          <div className="flex items-center gap-4">
+          {/* Logo */}
+          <div className="flex items-center">
             <Image
-              src="/logo_solanum_landscape.png"
+              src="/logo_dashboard.png"
               alt="Solanum Agrotech"
               width={180}
               height={50}
               className="h-10 lg:h-12 w-auto"
               priority
             />
-            <div className="hidden md:block h-8 lg:h-10 w-px bg-gray-300"></div>
-            <div className="hidden md:block">
-              <p className="text-sm lg:text-base text-gray-600">Sistem Laporan Insiden</p>
-            </div>
           </div>
 
           {/* User Info and Dropdown */}

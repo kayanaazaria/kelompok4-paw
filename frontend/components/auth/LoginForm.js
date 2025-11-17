@@ -13,16 +13,16 @@ export default function LoginForm({
   onGoogleLogin
 }) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {error && (
-        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
+        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-2">
           {error}
         </div>
       )}
 
-      <form className="space-y-5" onSubmit={onSubmit}>
+      <form className="space-y-3" onSubmit={onSubmit}>
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             Email
           </label>
           <input
@@ -33,12 +33,12 @@ export default function LoginForm({
             value={form.email}
             onChange={onFormChange}
             placeholder="Contoh@email.com"
-            className="w-full px-4 py-3 bg-gray-50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full px-3 py-2 bg-gray-50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
             Sandi
           </label>
           <div className="relative">
@@ -50,7 +50,7 @@ export default function LoginForm({
               value={form.password}
               onChange={onFormChange}
               placeholder="Minimal 8 karakter"
-              className="w-full px-4 py-3 bg-gray-50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3 py-2 bg-gray-50 border-0 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
             <button
               type="button"
@@ -69,8 +69,8 @@ export default function LoginForm({
               )}
             </button>
           </div>
-          <div className="text-right mt-2">
-            <a href="#" className="text-sm text-blue-600 hover:underline">
+          <div className="text-right mt-1">
+            <a href="#" className="text-xs text-blue-600 hover:underline">
               Lupa sandi?
             </a>
           </div>
@@ -79,7 +79,7 @@ export default function LoginForm({
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg py-3 transition disabled:opacity-60"
+          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg py-2 transition disabled:opacity-60"
         >
           {loading ? 'Memproses...' : 'Masuk'}
         </button>
@@ -89,7 +89,7 @@ export default function LoginForm({
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-gray-300"></div>
         </div>
-        <div className="relative flex justify-center text-sm">
+        <div className="relative flex justify-center text-xs">
           <span className="px-2 bg-white text-gray-500">Atau Masuk dengan Akun Google</span>
         </div>
       </div>
@@ -97,15 +97,15 @@ export default function LoginForm({
       <button
         type="button"
         onClick={onGoogleLogin}
-        className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+        className="w-full flex items-center justify-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
       >
         <Image
           src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
           alt="Google"
-          width={20}
-          height={20}
+          width={18}
+          height={18}
         />
-        <span className="text-gray-700 font-medium">Masuk dengan Google</span>
+        <span className="text-gray-700 text-sm font-medium">Masuk dengan Google</span>
       </button>
     </div>
   );
