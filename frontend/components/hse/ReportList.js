@@ -12,7 +12,9 @@ export default function ReportList({
   setActiveCard,
   onViewReport,
   getStatusBadge,
-  getTimeSince
+  getTimeSince,
+  hideDraftOption = false
+  , showDesktopTable = true
 }) {
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
@@ -71,7 +73,7 @@ export default function ReportList({
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-20">
                   {[
                     { value: "all", label: "Semua Status" },
-                    { value: "draft", label: "Draft" },
+                    ...(!hideDraftOption ? [{ value: "draft", label: "Draft" }] : []),
                     { value: "menunggu", label: "Menunggu" },
                     { value: "disetujui", label: "Disetujui" },
                     { value: "ditolak", label: "Ditolak" }
@@ -113,7 +115,8 @@ export default function ReportList({
         ) : (
           <>
             {/* Desktop Table */}
-            <table className="hidden lg:table min-w-full divide-y divide-gray-200">
+            {showDesktopTable && (
+              <table className="hidden lg:table min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -166,7 +169,8 @@ export default function ReportList({
                   </tr>
                 ))}
               </tbody>
-            </table>
+              </table>
+            )}
 
             {/* Mobile/Tablet Card View */}
             <div className="lg:hidden space-y-4 p-4">

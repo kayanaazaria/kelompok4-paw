@@ -12,8 +12,13 @@ const createLaporan = async (req, res) => {
     if (!req.user || !req.user._id) {
       return res.status(401).json({ message: "User tidak terautentikasi" });
     }
+    
+    // Generate unique report number
+    const nomorLaporan = await Laporan.getNextReportNumber();
+    
     const laporan = await Laporan.create({
       ...req.body,
+      nomorLaporan,
       createdByHSE: req.user._id,
       status: "Draft",
       isDraft: true,
@@ -192,29 +197,39 @@ const approveByKepalaBidang = async (req, res) => {
       `Halo,\n\nLaporan kecelakaan dari ${laporan.namaPekerja} sudah disetujui Kepala Bidang.\n\nMenunggu persetujuan Direktur SDM.`
     );
 
-    res.json({ message: "Laporan disetujui Kepala Bidang", laporan });
+    // re-populate signers for frontend convenience
+    const populated = await Laporan.findById(laporan._id)
+      .populate("createdByHSE", "username email role")
+      .populate("signedByKabid", "username email role")
+      .populate("approvedByDirektur", "username email role");
+
+    res.json({ message: "Laporan disetujui Kepala Bidang", laporan: populated });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Gagal approve laporan" });
   }
-};
-
-// Reject Kepala Bidang + notif ke HSE
+};// Reject Kepala Bidang + notif ke HSE
 const rejectByKepalaBidang = async (req, res) => {
   try {
     const laporan = await Laporan.findById(req.params.id).populate("createdByHSE", "email username");
     if (!laporan) return res.status(404).json({ message: "Laporan tidak ditemukan" });
 
     laporan.status = "Ditolak Kepala Bidang";
-    await laporan.save();
+      await laporan.save();
 
-    await sendEmail(
-      laporan.createdByHSE.email,
-      "Laporan Ditolak Kepala Bidang",
-      `Halo ${laporan.createdByHSE.username},\n\nLaporan kecelakaan anda ditolak oleh Kepala Bidang.`
-    );
+      // re-populate for frontend
+      const populated = await Laporan.findById(laporan._id)
+        .populate("createdByHSE", "username email role")
+        .populate("signedByKabid", "username email role")
+        .populate("approvedByDirektur", "username email role");
 
-    res.json({ message: "Laporan ditolak Kepala Bidang", laporan });
+      await sendEmail(
+        laporan.createdByHSE.email,
+        "Laporan Ditolak Kepala Bidang",
+        `Halo ${laporan.createdByHSE.username},\n\nLaporan kecelakaan anda ditolak oleh Kepala Bidang.`
+      );
+
+      res.json({ message: "Laporan ditolak Kepala Bidang", laporan: populated });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Gagal reject laporan" });

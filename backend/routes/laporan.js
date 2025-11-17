@@ -17,6 +17,7 @@ const {
   approveByDirektur,
   rejectByDirektur,
 } = require("../controllers/laporanController");
+const Laporan = require('../models/LaporanKecelakaan');
 
 //
 // ========================= HSE ROUTES =========================
@@ -84,5 +85,79 @@ router.put("/:id/reject-kepala", authMiddleware, roleCheck("kepala_bidang"), rej
 // Direktur approve/reject
 router.put("/:id/approve-direktur", authMiddleware, roleCheck("direktur_sdm"), approveByDirektur);
 router.put("/:id/reject-direktur", authMiddleware, roleCheck("direktur_sdm"), rejectByDirektur);
+
+// Kepala Bidang get laporan untuk departemennya (only pending, not approved/rejected)
+router.get("/kepala-bidang/my-reports", authMiddleware, roleCheck("kepala_bidang"), async (req, res) => {
+  try {
+    const laporan = await Laporan.find({
+      department: req.user.department,
+      status: "Menunggu Persetujuan Kepala Bidang"
+    })
+      .populate("createdByHSE", "username email role")
+      .populate("signedByKabid", "username email role")
+      .populate("approvedByDirektur", "username email role")
+      .sort({ createdAt: -1 });
+
+    res.json(laporan);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Gagal mengambil laporan" });
+  }
+});
+
+// Kepala Bidang get approved/rejected laporan untuk departemennya
+router.get("/kepala-bidang/approved-reports", authMiddleware, roleCheck("kepala_bidang"), async (req, res) => {
+  try {
+    const laporan = await Laporan.find({
+      department: req.user.department,
+      status: { $in: ["Menunggu Persetujuan Direktur SDM", "Ditolak Kepala Bidang"] }
+    })
+      .populate("createdByHSE", "username email role")
+      .populate("signedByKabid", "username email role")
+      .populate("approvedByDirektur", "username email role")
+      .sort({ createdAt: -1 });
+
+    res.json(laporan);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Gagal mengambil laporan" });
+  }
+});
+
+// Direktur SDM get laporan menunggu persetujuan direktur
+router.get("/direktur/my-reports", authMiddleware, roleCheck("direktur_sdm"), async (req, res) => {
+  try {
+    const laporan = await Laporan.find({
+      status: "Menunggu Persetujuan Direktur SDM"
+    })
+      .populate("createdByHSE", "username email role")
+      .populate("signedByKabid", "username email role")
+      .populate("approvedByDirektur", "username email role")
+      .sort({ createdAt: -1 });
+
+    res.json(laporan);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Gagal mengambil laporan" });
+  }
+});
+
+// Direktur SDM get semua laporan (sudah approved/rejected)
+router.get("/direktur/all-reports", authMiddleware, roleCheck("direktur_sdm"), async (req, res) => {
+  try {
+    const laporan = await Laporan.find({
+      status: { $in: ["Menunggu Persetujuan Direktur SDM", "Disetujui", "Ditolak Direktur SDM"] }
+    })
+      .populate("createdByHSE", "username email role")
+      .populate("signedByKabid", "username email role")
+      .populate("approvedByDirektur", "username email role")
+      .sort({ createdAt: -1 });
+
+    res.json(laporan);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Gagal mengambil laporan" });
+  }
+});
 
 module.exports = router;

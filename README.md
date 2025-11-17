@@ -13,10 +13,12 @@ Digitalisasi Sistem Laporan Kecelakaan Solanum Agrotech (US1)
 
 ## Deskripsi Aplikasi
 Aplikasi ini dikembangkan untuk mendigitalisasi proses pelaporan kecelakaan kerja di Solanum Agrotech. Dengan sistem ini, seluruh proses mulai dari pembuatan laporan oleh HSE, approval oleh Kepala Bidang, hingga persetujuan akhir Direktur SDM dapat dilakukan secara terintegrasi, aman, dan terdokumentasi dengan baik. Aplikasi web ini dibuat untuk menghindari kehilangan dokumen karena tercecer atau terbuang.
-Fitur utama meliputi:
+## Fitur utama meliputi:
 - Registrasi & Login Multi-Role (Admin, HSE, Kepala Bidang, Direktur SDM).
 - Pembuatan & Pengajuan Laporan Kecelakaan oleh HSE.
 - Tracking status laporan (Draft, Menunggu Approval, Selesai).
+- **Dashboard Kepala Bidang**: Melihat laporan dari departemen masing-masing, approve/tolak laporan, dan lihat detail laporan.
+- **Dashboard Direktur SDM**: Melihat semua laporan yang menunggu persetujuan, approve/tolak laporan, dan lihat history laporan.
 - Approval & Penolakan laporan oleh Kepala Bidang dan Direktur SDM.
 - Notifikasi Email Otomatis untuk setiap tahap persetujuan.
 - History dokumen & QR Code untuk verifikasi laporan final.
@@ -74,6 +76,54 @@ kelompok4-paw/
 	├─ package-lock.json
     ├─ package.json         
 	└─ server.js            
+└─ frontend/
+	├─ app/
+	│  ├─ globals.css
+	│  ├─ layout.js
+	│  ├─ page.js
+	│  ├─ auth/
+	│  │  └─ google/callback/
+	│  ├─ dashboard/
+	│  │  ├─ admin/page.js
+	│  │  ├─ approval-flow/page.js
+	│  │  ├─ hse/page.js
+	│  │  ├─ kepala-bidang/page.js (NEW)
+	│  │  └─ direktur-sdm/page.js (NEW)
+	│  ├─ hse/
+	│  │  ├─ final-documents/page.js
+	│  │  └─ laporan/
+	│  ├─ login/page.js
+	│  └─ verify/[id]/page.js
+	├─ components/
+	│  ├─ admin/
+	│  ├─ auth/
+	│  ├─ hse/
+	│  ├─ kepala-bidang/ (NEW)
+	│  │  ├─ KepalaBidangDashboard.js
+	│  │  ├─ ReportStats.js
+	│  │  ├─ ReportTable.js
+	│  │  ├─ ReportDetailModal.js
+	│  │  ├─ ReportCard.js
+	│  │  └─ PageHeader.js
+	│  └─ shared/
+	├─ hooks/
+	│  ├─ useKepalaBidangManagement.js (NEW)
+	│  ├─ useDirekturManagement.js (NEW)
+	│  ├─ useReportManagement.js
+	│  └─ useUserManagement.js
+	├─ public/
+	├─ services/
+	│  ├─ api.js (UPDATED)
+	│  ├─ authService.js
+	│  ├─ documentService.js
+	│  └─ userService.js
+	├─ utils/
+	│  └─ auth.js
+	├─ jsconfig.json
+	├─ next.config.js
+	├─ package.json
+	├─ postcss.config.js
+	└─ tailwind.config.js
 ```
 
 
@@ -104,7 +154,7 @@ https://drive.google.com/drive/folders/1Jd9orTNhqVqH9QuLWimp3WsCcNGWvOC0?usp=sha
 | Nama    | Fitur                                                                                                    |
 |---------|-----------------------------------------------------------------------------------------------------------------|
 | **Ega** | **Role Admin**: fitur assign role, atur registrasi akun <br> **Role Kepala Bidang & Direktur SDM**: registrasi + login <br> **Role HSE**: registrasi + login <br> **Tambahan**: pengamanan API sensitif dengan authorization (akses berdasarkan role) |
-| **Gaby** | **Role Kepala Bidang & Direktur SDM**: notifikasi email untuk approval, daftar pengajuan (lihat detail, approve/tolak) <br> **Role HSE**: tracking status (draft, menunggu approval, selesai) <br> **Tambahan**: password hashing untuk menyimpan password di database |
+| **Gaby** | **Role Kepala Bidang & Direktur SDM**: notifikasi email untuk approval, daftar pengajuan (lihat detail, approve/tolak), dashboard dengan statistik laporan, filter by status <br> **Role HSE**: tracking status (draft, menunggu approval, selesai) <br> **Tambahan**: password hashing untuk menyimpan password di database, API endpoint kepala-bidang/my-reports dan direktur/all-reports |
 | **Kayana** | **Role Kepala Bidang & Direktur SDM**: history dokumen yang sudah diapprove, filter & search <br> **Role HSE**: history dokumen yang sudah diapprove, filter & search <br> **Tambahan**: integrasi database MongoDB |
 | **Nicho** | **Role HSE**: form input laporan kecelakaan (tanggal, bagian, nama, NIP, detail kejadian, skala cedera), fitur upload attachment <br> **Tambahan**: API CRUD untuk laporan |
 | **Sharon** | **Role Kepala Bidang & Direktur SDM**: generate history alur penandatanganan & QR code (link ke dokumen final) <br> **Role HSE**: lihat & export final document <br> **Tambahan**: fitur login via Google (OAuth2) |

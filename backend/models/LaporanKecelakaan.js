@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const { DEPARTMENTS } = require('./userModel');
 
 const LaporanSchema = new mongoose.Schema({
+  nomorLaporan: { type: String, unique: true, sparse: true },
   tanggalKejadian: { type: Date, required: true },
   namaPekerja: { type: String, required: true },
   nomorIndukPekerja: { type: String, required: true },
@@ -30,5 +31,17 @@ const LaporanSchema = new mongoose.Schema({
   signedByKabid: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   approvedByDirektur: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
+
+// Helper function to generate next report number
+LaporanSchema.statics.getNextReportNumber = async function() {
+  const Counter = mongoose.model('Counter', new mongoose.Schema({ _id: String, seq: Number }), 'counters');
+  const counter = await Counter.findByIdAndUpdate(
+    'laporan_number',
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true }
+  );
+  const year = new Date().getFullYear();
+  return `SOLANUM-${year}-${String(counter.seq).padStart(4, '0')}`;
+};
 
 module.exports = mongoose.model('Laporan', LaporanSchema);
