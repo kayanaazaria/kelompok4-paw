@@ -24,7 +24,9 @@ const UserSchema = new mongoose.Schema({
     required: function () {
       return this.role === 'kepala_bidang';
     }
-  }
+  },
+  resetPasswordToken: String,
+  resetPasswordExpire: Date
 }, { timestamps: true });
 
 UserSchema.pre('save', async function (next) {

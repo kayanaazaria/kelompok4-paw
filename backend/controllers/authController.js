@@ -1,7 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const User = require('../models/userModel');
 const { blacklistToken, isTokenBlacklisted } = require('../utils/jwtBlacklist');
+const sendEmail = require('../utils/sendEmail');
 
 const generateToken = (id, role, username, email, department = null) => {
   const payload = { id, role, username, email };
@@ -213,10 +215,85 @@ const universalLogout = async (req, res) => {
   }
 };
 
+// Forgot Password - Send reset link
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "Email tidak ditemukan" });
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+    // Save token to user with expiry (1 hour)
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpire = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    // Create reset URL
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+
+    // Send email
+    const message = `Halo ${user.username},\n\nAnda menerima email ini karena Anda (atau seseorang) telah meminta untuk mereset password.\n\nSilakan klik link berikut untuk mereset password Anda:\n\n${resetUrl}\n\nLink ini akan kedaluwarsa dalam 1 jam.\n\nJika Anda tidak meminta reset password, abaikan email ini.\n\nTerima kasih.`;
+
+    await sendEmail(
+      user.email,
+      'Reset Password - Sistem Laporan Kecelakaan',
+      message
+    );
+
+    res.json({ message: "Email reset password telah dikirim" });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ message: "Gagal mengirim email reset password" });
+  }
+};
+
+// Reset Password - Update password with token
+const resetPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ message: "Token dan password wajib diisi" });
+    }
+
+    // Hash the token from URL
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    // Find user with valid token
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Token tidak valid atau sudah kedaluwarsa" });
+    }
+
+    // Update password
+    user.password = password; // Will be hashed by pre-save hook
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+
+    res.json({ message: "Password berhasil direset" });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ message: "Gagal reset password" });
+  }
+};
+
 module.exports = { 
   registerUser, 
   loginUser, 
   logoutUser, 
   logoutGoogleUser, 
-  universalLogout 
+  universalLogout,
+  forgotPassword,
+  resetPassword
 };

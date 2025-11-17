@@ -7,7 +7,9 @@ const {
   loginUser, 
   logoutUser, 
   logoutGoogleUser, 
-  universalLogout 
+  universalLogout,
+  forgotPassword,
+  resetPassword
 } = require('../controllers/authController');
 const { authMiddleware, roleCheck } = require('../middleware/auth');
 
@@ -81,5 +83,13 @@ router.get('/google/callback', (req, res, next) => {
     res.redirect(`${frontendUrl}/auth/google/callback?token=${token}`);
   })(req, res, next);
 });
+
+// ================== PASSWORD RESET ENDPOINTS ==================
+
+// Request password reset (send email)
+router.post('/forgot-password', forgotPassword);
+
+// Reset password with token
+router.post('/reset-password', resetPassword);
 
 module.exports = router;

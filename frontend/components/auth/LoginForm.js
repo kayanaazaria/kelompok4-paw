@@ -70,7 +70,7 @@ export default function LoginForm({
             </button>
           </div>
           <div className="text-right mt-1">
-            <a href="#" className="text-xs text-blue-600 hover:underline">
+            <a href="/forgot-password" className="text-xs text-emerald-600 hover:underline">
               Lupa sandi?
             </a>
           </div>
