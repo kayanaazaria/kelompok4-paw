@@ -38,7 +38,7 @@ export default function ReportDetailModal({
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Informasi Pekerja</h3>
             <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
               <div>
-                <p className="text-sm text-gray-600">Nama Pekerja</p>
+                <p className="text-sm text-gray-600">Nama Pegawai</p>
                 <p className="text-lg font-medium text-gray-900">{report.namaPekerja}</p>
               </div>
               <div>

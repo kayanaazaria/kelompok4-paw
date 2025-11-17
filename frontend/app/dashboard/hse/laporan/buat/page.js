@@ -79,7 +79,7 @@ export default function BuatLaporan() {
   const validateForm = () => {
     const errors = {};
     if (!formData.tanggalKejadian) errors.tanggalKejadian = "Tanggal kejadian wajib diisi";
-    if (!formData.namaPekerja) errors.namaPekerja = "Nama pekerja wajib diisi";
+    if (!formData.namaPekerja) errors.namaPekerja = "Nama pegawai wajib diisi";
     if (!formData.nomorIndukPekerja) {
       errors.nomorIndukPekerja = "NIP wajib diisi";
     } else if (formData.nomorIndukPekerja.length !== 18) {
@@ -179,8 +179,8 @@ export default function BuatLaporan() {
                     value={formData.tanggalKejadian}
                     onChange={handleChange}
                     max={new Date().toISOString().split('T')[0]}
-                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors ${
-                      formErrors.tanggalKejadian ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                    className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors ${
+                      formErrors.tanggalKejadian ? 'border-red-300 bg-red-50' : 'bg-gray-50 border-emerald-600'
                     }`}
                   />
                   {formErrors.tanggalKejadian && (
@@ -199,9 +199,9 @@ export default function BuatLaporan() {
                     name="namaPekerja"
                     value={formData.namaPekerja}
                     onChange={handleChange}
-                    placeholder="Masukkan nama pekerja"
-                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors ${
-                      formErrors.namaPekerja ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                    placeholder="Masukkan nama pegawai"
+                    className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                      formErrors.namaPekerja ? 'border-red-300 bg-red-50' : 'bg-gray-50 border-emerald-600'
                     }`}
                   />
                   {formErrors.namaPekerja && (
@@ -224,8 +224,8 @@ export default function BuatLaporan() {
                     onChange={handleChange}
                     maxLength={18}
                     placeholder="Masukkan NIP (18 digit angka)"
-                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors ${
-                      formErrors.nomorIndukPekerja ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                    className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors ${
+                      formErrors.nomorIndukPekerja ? 'border-red-300 bg-red-50' : 'bg-gray-50 border-emerald-600'
                     }`}
                   />
                   {formErrors.nomorIndukPekerja && (
@@ -243,8 +243,8 @@ export default function BuatLaporan() {
                     name="department"
                     value={formData.department}
                     onChange={handleChange}
-                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors ${
-                      formErrors.department ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                    className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors ${
+                      formErrors.department ? 'border-red-300 bg-red-50' : 'bg-gray-50 border-emerald-600'
                     }`}
                   >
                     <option value="">Pilih Departemen</option>
@@ -269,8 +269,8 @@ export default function BuatLaporan() {
                     name="skalaCedera"
                     value={formData.skalaCedera}
                     onChange={handleChange}
-                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors ${
-                      formErrors.skalaCedera ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                    className={`w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors ${
+                      formErrors.skalaCedera ? 'border-red-300 bg-red-50' : 'bg-gray-50 border-emerald-600'
                     }`}
                   >
                     <option value="">Pilih Skala Cedera</option>
@@ -301,8 +301,8 @@ export default function BuatLaporan() {
                   onChange={handleChange}
                   rows={6}
                   placeholder="Tuliskan detail lengkap mengenai kejadian kecelakaan..."
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors resize-none ${
-                    formErrors.detailKejadian ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors resize-none ${
+                    formErrors.detailKejadian ? 'border-red-300 bg-red-50' : 'bg-gray-50 border-emerald-600'
                   }`}
                 />
                 {formErrors.detailKejadian && (

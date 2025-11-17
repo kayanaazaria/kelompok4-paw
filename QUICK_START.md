@@ -67,7 +67,7 @@ Frontend akan running di `http://localhost:3000`
 1. Login sebagai HSE (`hse_user`)
 2. Go to `/dashboard/hse/laporan` atau buat laporan baru
 3. Buat laporan kecelakaan dengan:
-   - Nama Pekerja: "John Doe"
+   - Nama Pegawai: "John Doe"
    - Nomor Induk: "12345"
    - Departemen: "Mechanical Assembly"
    - Tanggal Kejadian: hari ini

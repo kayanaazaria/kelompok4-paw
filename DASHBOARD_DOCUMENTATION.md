@@ -6,7 +6,7 @@ Sistem ini menyediakan dashboard terpisah untuk masing-masing Kepala Bidang dan 
 
 1. **Melihat laporan** yang sesuai dengan role mereka
 2. **Approve atau menolak laporan** dengan notifikasi email otomatis
-3. **Melihat detail laporan lengkap** dengan informasi pekerja, kejadian, dan lampiran
+3. **Melihat detail laporan lengkap** dengan informasi pegawai, kejadian, dan lampiran
 4. **Filter berdasarkan status** (Menunggu Persetujuan, Disetujui, Ditolak)
 5. **Statistik laporan** dalam bentuk kartu ringkasan
 
@@ -58,13 +58,13 @@ Setiap Kepala Bidang hanya dapat melihat laporan dari departemennya masing-masin
 
 3. **ReportTable.js**
    - Tabel yang menampilkan daftar laporan
-   - Kolom: Nama Pekerja, Tanggal, Skala Cedera, Status, Aksi
+   - Kolom: Nama Pegawai, Tanggal, Skala Cedera, Status, Aksi
    - Tombol Approve/Tolak dengan loading state
    - Responsif dan mobile-friendly
 
 4. **ReportDetailModal.js**
    - Modal untuk melihat detail laporan lengkap
-   - Menampilkan: Informasi Pekerja, Kejadian, Lampiran, Status
+   - Menampilkan: Informasi Pegawai, Kejadian, Lampiran, Status
    - Tombol Approve/Tolak dengan konfirmasi
    - Dapat ditutup dengan tombol X atau Batal
 

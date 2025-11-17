@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Navbar, ErrorAlert } from "@/components/shared";
+import { Navbar, ErrorAlert, SubmitConfirmModal, DeleteConfirmModal } from "@/components/shared";
 import { 
   LaporanHeader, 
   LaporanInfo, 
@@ -27,6 +27,8 @@ export default function DetailLaporan() {
   const [editFormData, setEditFormData] = useState({});
   const [fileName, setFileName] = useState("");
   const [formErrors, setFormErrors] = useState({});
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const getAuthHeaders = () => {
     const token = sessionStorage.getItem("token");
@@ -129,18 +131,29 @@ export default function DetailLaporan() {
   };
 
   const handleSubmitForApproval = async () => {
-    if (window.confirm("Submit laporan untuk persetujuan?")) {
-      try {
-        const token = sessionStorage.getItem("token");
-        await axios.put(
-          `${API_URL}/laporan/${laporan._id}/submit`,
-          {},
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        router.push("/dashboard/hse");
-      } catch (err) {
-        alert(err.response?.data?.message || "Gagal submit laporan");
-      }
+    try {
+      const token = sessionStorage.getItem("token");
+      await axios.put(
+        `${API_URL}/laporan/${laporan._id}/submit`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      router.push("/dashboard/hse");
+    } catch (err) {
+      alert(err.response?.data?.message || "Gagal submit laporan");
+    }
+  };
+
+  const handleDeleteReport = async () => {
+    try {
+      const token = sessionStorage.getItem("token");
+      await axios.delete(
+        `${API_URL}/laporan/${laporan._id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      router.push("/dashboard/hse");
+    } catch (err) {
+      alert(err.response?.data?.message || "Gagal menghapus laporan");
     }
   };
 
@@ -219,7 +232,25 @@ export default function DetailLaporan() {
           <ActionButtons 
             laporan={laporan}
             onEdit={() => setIsEditing(true)}
-            onSubmit={handleSubmitForApproval}
+            onSubmit={() => setShowSubmitModal(true)}
+            onDelete={() => setShowDeleteModal(true)}
+          />
+
+          {/* Submit Confirmation Modal */}
+          <SubmitConfirmModal
+            show={showSubmitModal}
+            onClose={() => setShowSubmitModal(false)}
+            onConfirm={handleSubmitForApproval}
+            reportName={laporan.namaPekerja}
+          />
+
+          {/* Delete Confirmation Modal */}
+          <DeleteConfirmModal
+            show={showDeleteModal}
+            onClose={() => setShowDeleteModal(false)}
+            onConfirm={handleDeleteReport}
+            itemName={laporan.namaPekerja}
+            title="Hapus Laporan Draft"
           />
         </div>
       </div>

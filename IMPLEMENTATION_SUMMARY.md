@@ -29,14 +29,14 @@ Telah berhasil mengimplementasikan dashboard lengkap untuk kedua role penting da
    - Badge counter di setiap tab
 
 4. ✅ **Tabel Laporan**
-   - Nama Pekerja
+   - Nama Pegawai
    - Tanggal Kejadian
    - Skala Cedera (dengan warna: Ringan-Kuning, Menengah-Orange, Berat-Merah)
    - Status (dengan badge warna sesuai status)
    - Tombol Lihat Detail, Approve, Tolak
 
 5. ✅ **Detail Modal**
-   - Informasi Pekerja (Nama, Nomor Induk, Departemen)
+   - Informasi Pegawai (Nama, Nomor Induk, Departemen)
    - Informasi Kejadian (Tanggal, Skala Cedera, Detail Kejadian)
    - Lampiran File
    - Status Laporan

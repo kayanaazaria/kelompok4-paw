@@ -13,11 +13,33 @@ const createLaporan = async (req, res) => {
       return res.status(401).json({ message: "User tidak terautentikasi" });
     }
     
+    // Validasi field required
+    const { tanggalKejadian, namaPekerja, nomorIndukPekerja, department, skalaCedera, detailKejadian } = req.body;
+    
+    if (!tanggalKejadian || !namaPekerja || !nomorIndukPekerja || !department || !skalaCedera || !detailKejadian) {
+      return res.status(400).json({ 
+        message: "Semua field wajib diisi",
+        missing: {
+          tanggalKejadian: !tanggalKejadian,
+          namaPekerja: !namaPekerja,
+          nomorIndukPekerja: !nomorIndukPekerja,
+          department: !department,
+          skalaCedera: !skalaCedera,
+          detailKejadian: !detailKejadian
+        }
+      });
+    }
+    
     // Generate unique report number
     const nomorLaporan = await Laporan.getNextReportNumber();
     
     const laporan = await Laporan.create({
-      ...req.body,
+      tanggalKejadian,
+      namaPekerja,
+      nomorIndukPekerja,
+      department,
+      skalaCedera,
+      detailKejadian,
       nomorLaporan,
       createdByHSE: req.user._id,
       status: "Draft",
@@ -27,21 +49,36 @@ const createLaporan = async (req, res) => {
     console.log("DEBUG laporan created:", laporan);
     res.status(201).json(laporan);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Gagal membuat laporan" });
+    console.error("Error creating laporan:", error);
+    res.status(500).json({ 
+      message: "Gagal membuat laporan",
+      error: error.message,
+      details: error.errors ? Object.keys(error.errors).map(key => ({
+        field: key,
+        message: error.errors[key].message
+      })) : null
+    });
   }
 };
 
 // UPDATE laporan (bisa ubah data atau ganti file)
 const updateLaporan = async (req, res) => {
   try {
+    // Cek apakah laporan ada
+    const laporan = await Laporan.findById(req.params.id);
+    if (!laporan) return res.status(404).json({ message: "Laporan tidak ditemukan" });
+
+    // Validasi: Hanya HSE yang membuat laporan yang bisa mengedit
+    if (laporan.createdByHSE.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Anda tidak berwenang mengedit laporan ini" });
+    }
+
     const body = req.body;
     if (req.file) body.attachmentUrl = `/uploads/${req.file.filename}`;
 
-    const laporan = await Laporan.findByIdAndUpdate(req.params.id, body, { new: true });
-    if (!laporan) return res.status(404).json({ message: "Laporan tidak ditemukan" });
+    const updatedLaporan = await Laporan.findByIdAndUpdate(req.params.id, body, { new: true });
 
-    res.json(laporan);
+    res.json(updatedLaporan);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -50,8 +87,21 @@ const updateLaporan = async (req, res) => {
 // DELETE laporan
 const deleteLaporan = async (req, res) => {
   try {
-    const laporan = await Laporan.findByIdAndDelete(req.params.id);
+    // Cek apakah laporan ada
+    const laporan = await Laporan.findById(req.params.id);
     if (!laporan) return res.status(404).json({ message: "Laporan tidak ditemukan" });
+
+    // Validasi: Hanya HSE yang membuat laporan yang bisa menghapus
+    if (laporan.createdByHSE.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Anda tidak berwenang menghapus laporan ini" });
+    }
+
+    // Hanya bisa hapus laporan dengan status Draft
+    if (laporan.status !== "Draft") {
+      return res.status(400).json({ message: "Hanya laporan Draft yang bisa dihapus" });
+    }
+
+    await Laporan.findByIdAndDelete(req.params.id);
 
     res.json({ message: "Laporan berhasil dihapus" });
   } catch (error) {
@@ -89,7 +139,7 @@ const submitLaporan = async (req, res) => {
         "Laporan Kecelakaan Baru – Butuh Persetujuan",
         `Halo,\n\nAda laporan kecelakaan baru dari ${req.user.username}.
         
-Nama Pekerja : ${laporan.namaPekerja}
+Nama Pegawai : ${laporan.namaPekerja}
 Tanggal      : ${laporan.tanggalKejadian?.toDateString()}
 Departemen   : ${laporan.department}
 Skala Cedera : ${laporan.skalaCedera}

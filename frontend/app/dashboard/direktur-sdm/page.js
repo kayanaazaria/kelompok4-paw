@@ -237,8 +237,8 @@ function ReportTableDirektur({
         <table className="min-w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                Nama Pekerja
+              <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Nama Pegawai
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                 Departemen
@@ -354,7 +354,7 @@ function DetailModal({
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Informasi Pekerja</h3>
             <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
               <div>
-                <p className="text-sm text-gray-600">Nama Pekerja</p>
+                <p className="text-sm text-gray-600">Nama Pegawai</p>
                 <p className="text-lg font-medium text-gray-900">{report.namaPekerja}</p>
               </div>
               <div>

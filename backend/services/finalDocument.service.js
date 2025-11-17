@@ -73,7 +73,7 @@ async function buildFinalPdfFromLaporan(laporan, { qrLink }) {
     doc.fontSize(12);
     labelVal('Tanggal:', fmtDate(data.date));
     labelVal('Departemen:', data.department || '-');
-    labelVal('Nama Pekerja:', data.employeeName || '-');
+    labelVal('Nama Pegawai:', data.employeeName || '-');
     labelVal('NIP:', data.nip || '-');
     labelVal('Skala Cedera:', (data.injuryScale || '-').toString().toLowerCase());
     doc.moveDown(0.8);

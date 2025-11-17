@@ -35,26 +35,26 @@ const EditLaporanForm = ({
               value={formData.tanggalKejadian}
               onChange={onChange}
               max={new Date().toISOString().split('T')[0]}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-emerald-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-600"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Nama Pekerja
+              Nama Pegawai
             </label>
             <input
               type="text"
               name="namaPekerja"
               value={formData.namaPekerja}
               onChange={onChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-emerald-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-600"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Nomor Induk Pekerja
+              Nomor Induk Pegawai
             </label>
             <input
               type="text"
@@ -65,7 +65,7 @@ const EditLaporanForm = ({
               onChange={onChange}
               maxLength={18}
               placeholder="18 digit angka"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-emerald-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-600"
             />
           </div>
 
@@ -77,7 +77,7 @@ const EditLaporanForm = ({
               name="department"
               value={formData.department}
               onChange={onChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-emerald-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-600"
             >
               <option value="">Pilih Departemen</option>
               {DEPARTMENTS.map((dept) => (
@@ -96,7 +96,7 @@ const EditLaporanForm = ({
               name="skalaCedera"
               value={formData.skalaCedera}
               onChange={onChange}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-emerald-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-600"
             >
               <option value="">Pilih Skala Cedera</option>
               <option value="Ringan">Ringan</option>
@@ -115,7 +115,7 @@ const EditLaporanForm = ({
             value={formData.detailKejadian}
             onChange={onChange}
             rows={6}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-2.5 bg-gray-50 border border-emerald-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-600"
           />
         </div>
 
@@ -124,18 +124,18 @@ const EditLaporanForm = ({
             Upload File Baru (Opsional)
           </label>
           {fileName ? (
-            <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
               <div className="flex items-center gap-3">
-                <Paperclip className="w-5 h-5 text-blue-600" />
-                <span className="text-sm font-medium text-blue-700">{fileName}</span>
+                <Paperclip className="w-5 h-5 text-emerald-600" />
+                <span className="text-sm font-medium text-emerald-700">{fileName}</span>
               </div>
               <button
                 type="button"
                 onClick={onRemoveFile}
-                className="p-1 hover:bg-blue-100 rounded-full transition-colors"
+                className="p-1 hover:bg-emerald-100 rounded-full transition-colors"
                 title="Hapus file"
               >
-                <X className="w-5 h-5 text-blue-600" />
+                <X className="w-5 h-5 text-emerald-600" />
               </button>
             </div>
           ) : (
@@ -171,7 +171,7 @@ const EditLaporanForm = ({
           <button
             type="button"
             onClick={onSave}
-            className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="flex-1 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
           >
             Simpan Perubahan
           </button>

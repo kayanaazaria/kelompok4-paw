@@ -304,7 +304,7 @@ Laporan.find({
 1. **Accident happens** → HSE notified
 2. **HSE open app** → `/dashboard/hse/laporan`
 3. **Fill report form**:
-   - Nama Pekerja: "Ahmad"
+   - Nama Pegawai: "Ahmad"
    - NIP: "12345"
    - Department: "Mechanical Assembly"
    - Date: "2025-11-17"
