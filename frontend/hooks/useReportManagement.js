@@ -35,7 +35,11 @@ const useReportManagement = () => {
       setLoading(true);
       setError(null);
       const response = await axios.get(`${API_URL}/laporan`, getAuthHeaders());
-      setReports(response.data);
+      // Sort reports by updatedAt in descending order (newest first)
+      const sortedReports = response.data.sort((a, b) => 
+        new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt)
+      );
+      setReports(sortedReports);
     } catch (err) {
       setError(err.response?.data?.message || "Gagal mengambil laporan");
       console.error("Error fetching reports:", err);
