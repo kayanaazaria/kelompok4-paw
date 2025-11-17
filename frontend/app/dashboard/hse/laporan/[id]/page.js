@@ -62,7 +62,16 @@ export default function DetailLaporan() {
 
   const handleEditChange = (e) => {
     const { name, value } = e.target;
-    setEditFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Special handling for nomorIndukPekerja - only allow numbers and max 18 digits
+    if (name === 'nomorIndukPekerja') {
+      const numbersOnly = value.replace(/\D/g, ''); // Remove non-numeric characters
+      const limited = numbersOnly.slice(0, 18); // Limit to 18 digits
+      setEditFormData(prev => ({ ...prev, [name]: limited }));
+    } else {
+      setEditFormData(prev => ({ ...prev, [name]: value }));
+    }
+    
     if (formErrors[name]) {
       setFormErrors(prev => ({ ...prev, [name]: "" }));
     }

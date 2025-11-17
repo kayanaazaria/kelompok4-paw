@@ -36,7 +36,16 @@ export default function BuatLaporan() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Special handling for nomorIndukPekerja - only allow numbers and max 18 digits
+    if (name === 'nomorIndukPekerja') {
+      const numbersOnly = value.replace(/\D/g, ''); // Remove non-numeric characters
+      const limited = numbersOnly.slice(0, 18); // Limit to 18 digits
+      setFormData(prev => ({ ...prev, [name]: limited }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+    
     if (formErrors[name]) {
       setFormErrors(prev => ({ ...prev, [name]: "" }));
     }
@@ -71,7 +80,11 @@ export default function BuatLaporan() {
     const errors = {};
     if (!formData.tanggalKejadian) errors.tanggalKejadian = "Tanggal kejadian wajib diisi";
     if (!formData.namaPekerja) errors.namaPekerja = "Nama pekerja wajib diisi";
-    if (!formData.nomorIndukPekerja) errors.nomorIndukPekerja = "NIP wajib diisi";
+    if (!formData.nomorIndukPekerja) {
+      errors.nomorIndukPekerja = "NIP wajib diisi";
+    } else if (formData.nomorIndukPekerja.length !== 18) {
+      errors.nomorIndukPekerja = "NIP harus 18 digit angka";
+    }
     if (!formData.department) errors.department = "Departemen wajib diisi";
     if (!formData.skalaCedera) errors.skalaCedera = "Skala cedera wajib diisi";
     if (!formData.detailKejadian) errors.detailKejadian = "Detail kejadian wajib diisi";
@@ -204,10 +217,13 @@ export default function BuatLaporan() {
                   </label>
                   <input
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     name="nomorIndukPekerja"
                     value={formData.nomorIndukPekerja}
                     onChange={handleChange}
-                    placeholder="Masukkan NIP"
+                    maxLength={18}
+                    placeholder="Masukkan NIP (18 digit angka)"
                     className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors ${
                       formErrors.nomorIndukPekerja ? 'border-red-300 bg-red-50' : 'border-gray-300'
                     }`}

@@ -58,9 +58,13 @@ const EditLaporanForm = ({
             </label>
             <input
               type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               name="nomorIndukPekerja"
               value={formData.nomorIndukPekerja}
               onChange={onChange}
+              maxLength={18}
+              placeholder="18 digit angka"
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
