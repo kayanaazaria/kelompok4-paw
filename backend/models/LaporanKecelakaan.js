@@ -34,7 +34,13 @@ const LaporanSchema = new mongoose.Schema({
 
 // Helper function to generate next report number
 LaporanSchema.statics.getNextReportNumber = async function() {
-  const Counter = mongoose.model('Counter', new mongoose.Schema({ _id: String, seq: Number }), 'counters');
+  // const Counter = mongoose.model('Counter', new mongoose.Schema({ _id: String, seq: Number }), 'counters');
+  const CounterSchema = new mongoose.Schema({
+  _id: { type: String, required: true},
+  seq: { type: Number, default: 0 },
+  });
+  const Counter = mongoose.models.Counter || mongoose.model("Counter", CounterSchema);
+
   const counter = await Counter.findByIdAndUpdate(
     'laporan_number',
     { $inc: { seq: 1 } },
