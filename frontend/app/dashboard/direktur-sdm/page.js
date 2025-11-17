@@ -2,11 +2,9 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import api, { API_BASE_URL } from "@/services/api";
 import { Navbar, ErrorAlert } from "@/components/shared";
 import { PageHeader, ReportStats, ReportList } from "@/components/hse";
-
-const API_URL = "/api";
 
 export default function DirekturSDMDashboard() {
   const [reports, setReports] = useState([]);
@@ -18,11 +16,6 @@ export default function DirekturSDMDashboard() {
   
   const router = useRouter();
 
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem("token");
-    return { headers: { Authorization: `Bearer ${token}` } };
-  };
-
   useEffect(() => {
     fetchReports();
   }, []);
@@ -31,7 +24,9 @@ export default function DirekturSDMDashboard() {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get(`${API_URL}/laporan`, getAuthHeaders());
+      
+      const response = await api.get(`${API_BASE_URL}/laporan`);
+      console.log("Fetched reports:", response.data);
       
       // Filter only reports that need Direktur SDM action (approved by Kepala Bidang)
       const filteredReports = response.data.filter(
@@ -41,6 +36,8 @@ export default function DirekturSDMDashboard() {
           report.status === "Ditolak Direktur SDM"
       );
       
+      console.log("Filtered reports for Direktur SDM:", filteredReports);
+      
       // Sort by updatedAt descending
       const sortedReports = filteredReports.sort((a, b) => 
         new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt)
@@ -48,8 +45,9 @@ export default function DirekturSDMDashboard() {
       
       setReports(sortedReports);
     } catch (err) {
-      setError(err.response?.data?.message || "Gagal mengambil laporan");
       console.error("Error fetching reports:", err);
+      console.error("Error response:", err.response);
+      setError(err.response?.data?.message || "Gagal mengambil laporan");
     } finally {
       setLoading(false);
     }

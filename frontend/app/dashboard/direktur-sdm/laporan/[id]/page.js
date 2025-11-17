@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import axios from "axios";
+import api, { API_BASE_URL } from "@/services/api";
 import { Navbar, ErrorAlert } from "@/components/shared";
 import { 
   LaporanHeader, 
@@ -12,8 +12,6 @@ import {
   ApprovalInfo 
 } from "@/components/hse/detail";
 import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
-
-const API_URL = "/api";
 
 export default function DetailLaporanDirektur() {
   const router = useRouter();
@@ -25,17 +23,12 @@ export default function DetailLaporanDirektur() {
   const [rejectionReason, setRejectionReason] = useState("");
   const [showRejectModal, setShowRejectModal] = useState(false);
 
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem("token");
-    return { headers: { Authorization: `Bearer ${token}` } };
-  };
-
   useEffect(() => {
     const fetchLaporan = async () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await axios.get(`${API_URL}/laporan/${params.id}`, getAuthHeaders());
+        const response = await api.get(`${API_BASE_URL}/laporan/${params.id}`);
         setLaporan(response.data);
       } catch (err) {
         setError(err.response?.data?.message || "Gagal mengambil detail laporan");
@@ -57,10 +50,8 @@ export default function DetailLaporanDirektur() {
     try {
       setActionLoading(true);
       setError(null);
-      await axios.put(
-        `${API_URL}/laporan/${params.id}/approve-direktur`,
-        {},
-        getAuthHeaders()
+      await api.put(
+        `/api/laporan/${params.id}/approve-direktur`
       );
       alert("Laporan berhasil disetujui");
       router.push("/dashboard/direktur-sdm");
@@ -80,10 +71,9 @@ export default function DetailLaporanDirektur() {
     try {
       setActionLoading(true);
       setError(null);
-      await axios.put(
-        `${API_URL}/laporan/${params.id}/reject-direktur`,
-        { alasanPenolakan: rejectionReason },
-        getAuthHeaders()
+      await api.put(
+        `/api/laporan/${params.id}/reject-direktur`,
+        { alasanPenolakan: rejectionReason }
       );
       alert("Laporan berhasil ditolak");
       setShowRejectModal(false);
