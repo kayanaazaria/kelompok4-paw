@@ -16,7 +16,7 @@ export default function UserTable({
   const adminCount = users?.filter(u => u.role === 'admin').length || 0;
   const isCurrentUserAdmin = currentUser?.role === 'admin';
   return (
-    <div className="hidden md:block overflow-x-auto">
+    <div className="hidden lg:block overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
@@ -28,6 +28,9 @@ export default function UserTable({
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Role
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Tanggal Dibuat
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
@@ -47,6 +50,18 @@ export default function UserTable({
                 <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getRoleBadgeColor(user.role)}`}>
                   {getDisplayRole(user)}
                 </span>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="text-sm text-gray-700">
+                  {user.createdAt 
+                    ? new Date(user.createdAt).toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })
+                    : '-'
+                  }
+                </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div className="flex gap-3">
