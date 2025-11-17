@@ -32,6 +32,7 @@ const LaporanSchema = new mongoose.Schema({
   approvedByDirektur: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 
+
 // Helper function to generate next report number
 LaporanSchema.statics.getNextReportNumber = async function() {
   // const Counter = mongoose.model('Counter', new mongoose.Schema({ _id: String, seq: Number }), 'counters');
@@ -49,5 +50,11 @@ LaporanSchema.statics.getNextReportNumber = async function() {
   const year = new Date().getFullYear();
   return `SOLANUM-${year}-${String(counter.seq).padStart(4, '0')}`;
 };
+LaporanSchema.pre("save", async function (next) {
+  if (!this.nomorLaporan) {
+    this.nomorLaporan = await this.constructor.getNextReportNumber();
+  }
+  next();
+});
 
 module.exports = mongoose.model('Laporan', LaporanSchema);

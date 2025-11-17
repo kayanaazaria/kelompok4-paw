@@ -47,7 +47,11 @@ const createLaporan = async (req, res) => {
       attachmentUrl: req.file ? `/uploads/${req.file.filename}` : null,
     });
     console.log("DEBUG laporan created:", laporan);
-    res.status(201).json(laporan);
+    res.status(201).json({
+      message: "Laporan berhasil dibuat",
+      nomorLaporan: laporan.nomorLaporan,
+      laporan
+    });
   } catch (error) {
     console.error("Error creating laporan:", error);
     res.status(500).json({ 
