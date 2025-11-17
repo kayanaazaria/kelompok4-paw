@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { login } from '@/services/authService';
 import { getRoleRoute, storeAuthSession } from '@/utils/auth';
-import { LoginForm, LoginHeader, LoginHero } from '@/components/auth';
+import { LoginLayout } from '@/components/auth';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -45,52 +45,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Desktop Layout */}
-      <div className="hidden lg:flex min-h-screen">
-        <LoginHero />
-        
-        <div className="w-1/2 relative bg-white">
-          <div className="min-h-screen flex items-center justify-center px-12 py-7">
-            <div className="w-full max-w-md space-y-3">
-              <LoginHeader />
-              
-              <LoginForm
-                form={form}
-                error={error}
-                loading={loading}
-                showPassword={showPassword}
-                onFormChange={handleChange}
-                onSubmit={handleSubmit}
-                onTogglePassword={() => setShowPassword(!showPassword)}
-                onGoogleLogin={handleGoogleLogin}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile/Tablet Layout */}
-      <div className="lg:hidden min-h-screen flex flex-col bg-white">
-        <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
-          <div className="w-full max-w-md">
-            <LoginHeader isMobile />
-            
-            <div className="mt-6">
-              <LoginForm
-                form={form}
-                error={error}
-                loading={loading}
-                showPassword={showPassword}
-                onFormChange={handleChange}
-                onSubmit={handleSubmit}
-                onTogglePassword={() => setShowPassword(!showPassword)}
-                onGoogleLogin={handleGoogleLogin}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <LoginLayout
+      form={form}
+      error={error}
+      loading={loading}
+      showPassword={showPassword}
+      onFormChange={handleChange}
+      onSubmit={handleSubmit}
+      onTogglePassword={() => setShowPassword(!showPassword)}
+      onGoogleLogin={handleGoogleLogin}
+    />
   );
 }
