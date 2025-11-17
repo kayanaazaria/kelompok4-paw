@@ -125,50 +125,44 @@ export default function KepalaBidangDashboardPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar currentUser={currentUser} formatRole={() => 'Kepala Bidang'} />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      {/* Header container - same spacing as HSE */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8">
         <PageHeader
           title={`Dashboard Kepala Bidang ${currentUser?.department || ''}`}
           subtitle={currentUser?.department || 'Kepala Bidang'}
           description={`Tinjau dan setujui laporan insiden untuk departemen ${currentUser?.department || ''}`}
           showCreate={false}
         />
+      </div>
 
+      {/* Stats Cards container - match HSE spacing */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-6 sm:pb-8">
         <ErrorAlert message={error || approvalError} />
+        <ReportStats 
+          stats={stats} 
+          activeCard={activeCard} 
+          onCardClick={setActiveCard}
+          hideDraftCard={true} 
+        />
+      </div>
 
-        <div className="space-y-6">
-          {/* Three Category Cards */}
-          <ReportStats 
-            stats={stats} 
-            activeCard={activeCard} 
-            onCardClick={setActiveCard}
-            hideDraftCard={true} 
-          />
-
-          {/* Report List and Table for selected category */}
-          <ReportList
-            filteredReports={filteredReports}
-            loading={loading}
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            statusFilter={activeCard}
-            setStatusFilter={setActiveCard}
-            activeCard={activeCard}
-            setActiveCard={setActiveCard}
-            onViewReport={(r) => openDetailModal(r)}
-            getStatusBadge={getStatusBadge}
-            getTimeSince={getTimeSince}
-            hideDraftOption={true}
-            showDesktopTable={false}
-          />
-
-          {/* Desktop table */}
-          <ReportTable
-            reports={filteredReports}
-            onViewReport={(r) => openDetailModal(r)}
-            getStatusBadge={getStatusBadge}
-            getTimeSince={getTimeSince}
-          />
-        </div>
+      {/* Report List container - match HSE spacing */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <ReportList
+          filteredReports={filteredReports}
+          loading={loading}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          statusFilter={activeCard}
+          setStatusFilter={setActiveCard}
+          activeCard={activeCard}
+          setActiveCard={setActiveCard}
+          onViewReport={(r) => openDetailModal(r)}
+          getStatusBadge={getStatusBadge}
+          getTimeSince={getTimeSince}
+          hideDraftOption={true}
+          showDesktopTable={true}
+        />
 
         {showDetailModal && selectedReport && (
           <ReportDetailModal
