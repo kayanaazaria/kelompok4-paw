@@ -11,7 +11,8 @@ export default function RejectModal({
   placeholder = 'Masukkan alasan penolakan...',
   confirmLabel = 'Tolak',
   cancelLabel = 'Batal',
-  initialReason = ''
+  initialReason = '',
+  loading = false,
 }) {
   const [reason, setReason] = useState(initialReason);
 
@@ -45,7 +46,8 @@ export default function RejectModal({
               setReason('');
               onClose();
             }}
-            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            disabled={loading}
+            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {cancelLabel}
           </button>
@@ -53,10 +55,10 @@ export default function RejectModal({
             onClick={() => {
               onConfirm(reason);
             }}
-            disabled={!reason.trim()}
+            disabled={loading || !reason.trim()}
             className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {confirmLabel}
+            {loading ? 'Memproses...' : confirmLabel}
           </button>
         </div>
       </div>

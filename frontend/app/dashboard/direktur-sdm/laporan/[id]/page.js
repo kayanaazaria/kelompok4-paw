@@ -204,6 +204,7 @@ export default function DetailLaporanDirektur() {
         show={showSubmitModal}
         onClose={() => setShowSubmitModal(false)}
         onConfirm={confirmApprove}
+        loading={actionLoading}
         reportName={laporan?.title || laporan?.judul}
         title={"Setujui Laporan"}
         message={"Apakah Anda yakin ingin menyetujui laporan ini?"}
@@ -215,6 +216,7 @@ export default function DetailLaporanDirektur() {
         show={showRejectModal}
         onClose={() => setShowRejectModal(false)}
         onConfirm={(reason) => handleReject(reason)}
+        loading={actionLoading}
       />
     </div>
   );

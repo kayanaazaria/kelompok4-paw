@@ -210,6 +210,7 @@ export default function DetailLaporanKepalaBidang() {
         show={showSubmitModal}
         onClose={() => setShowSubmitModal(false)}
         onConfirm={confirmApprove}
+        loading={actionLoading}
         reportName={laporan?.title || laporan?.judul}
         title={"Setujui Laporan"}
         message={"Apakah Anda yakin ingin menyetujui laporan ini dan meneruskan ke Direktur SDM?"}
@@ -220,6 +221,7 @@ export default function DetailLaporanKepalaBidang() {
         show={showRejectModal}
         onClose={() => setShowRejectModal(false)}
         onConfirm={(reason) => handleReject(reason)}
+        loading={actionLoading}
       />
     </div>
   );

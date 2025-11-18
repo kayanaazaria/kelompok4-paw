@@ -26,6 +26,7 @@ export default function DetailLaporan() {
   const [fileName, setFileName] = useState("");
   const [formErrors, setFormErrors] = useState({});
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
@@ -125,6 +126,7 @@ export default function DetailLaporan() {
 
   const handleSubmitForApproval = async () => {
     try {
+      setActionLoading(true);
       const token = sessionStorage.getItem("token");
       await api.put(
         `/api/laporan/${laporan._id}/submit`,
@@ -134,6 +136,8 @@ export default function DetailLaporan() {
       router.push("/dashboard/hse");
     } catch (err) {
       alert(err.response?.data?.message || "Gagal submit laporan");
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -234,6 +238,7 @@ export default function DetailLaporan() {
             show={showSubmitModal}
             onClose={() => setShowSubmitModal(false)}
             onConfirm={handleSubmitForApproval}
+            loading={actionLoading}
             reportName={laporan.namaPekerja}
           />
 
