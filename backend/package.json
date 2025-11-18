@@ -19,7 +19,9 @@
   },
   "homepage": "https://github.com/kayanaazaria/kelompok4-paw#readme",
   "dependencies": {
+    "@supabase/supabase-js": "^2.81.1",
     "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
@@ -29,7 +31,6 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.2",
     "multer": "^2.0.2",
-    "cookie-parser": "^1.4.6",
     "nodemailer": "^7.0.6",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",

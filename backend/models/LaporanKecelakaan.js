@@ -1,6 +1,14 @@
 const mongoose = require('mongoose');
 const { DEPARTMENTS } = require('./userModel');
 
+const LampiranSchema = new mongoose.Schema({
+  originalName: { type: String, required: true },
+  url: { type: String, required: true },
+  path: { type: String, required: true },
+  mimetype: { type: String, required: true },
+  size: { type: Number, required: true }
+}, { _id: false });
+
 const LaporanSchema = new mongoose.Schema({
   nomorLaporan: { type: String, unique: true },
   tanggalKejadian: { type: Date, required: true },
@@ -8,7 +16,7 @@ const LaporanSchema = new mongoose.Schema({
   nomorIndukPekerja: { type: String, required: true },
   detailKejadian: { type: String, required: true },
   skalaCedera: { type: String, enum: ['Ringan','Menengah','Berat'], required: true },
-  attachmentUrl: { type: String },
+  lampiran: [LampiranSchema],
   department: { 
     type: String, 
     enum: DEPARTMENTS,

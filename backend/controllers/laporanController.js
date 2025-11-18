@@ -1,6 +1,7 @@
 const Laporan = require("../models/LaporanKecelakaan");
 const User = require("../models/userModel");
 const sendEmail = require("../utils/sendEmail");
+const { deleteLampiranFiles } = require("../utils/supabaseDelete");
 
 // Buat laporan (HSE simpan Draft)
 const createLaporan = async (req, res) => {
@@ -8,6 +9,7 @@ const createLaporan = async (req, res) => {
     console.log("DEBUG req.user:", req.user);
     console.log("DEBUG req.body:", req.body);
     console.log("DEBUG req.file:", req.file);
+    console.log("DEBUG req.uploadedFiles:", req.uploadedFiles);
 
     if (!req.user || !req.user._id) {
       return res.status(401).json({ message: "User tidak terautentikasi" });
@@ -44,7 +46,7 @@ const createLaporan = async (req, res) => {
       createdByHSE: req.user._id,
       status: "Draft",
       isDraft: true,
-      attachmentUrl: req.file ? `/uploads/${req.file.filename}` : null,
+      lampiran: req.uploadedFiles || [], // Array of file objects from Supabase
     });
     console.log("DEBUG laporan created:", laporan);
     res.status(201).json({
@@ -78,7 +80,9 @@ const updateLaporan = async (req, res) => {
     }
 
     const body = req.body;
-    if (req.file) body.attachmentUrl = `/uploads/${req.file.filename}`;
+    if (req.uploadedFiles && req.uploadedFiles.length > 0) {
+      body.lampiran = req.uploadedFiles; // Replace with new files from Supabase
+    }
 
     const updatedLaporan = await Laporan.findByIdAndUpdate(req.params.id, body, { new: true });
 
@@ -103,6 +107,15 @@ const deleteLaporan = async (req, res) => {
     // Hanya bisa hapus laporan dengan status Draft
     if (laporan.status !== "Draft") {
       return res.status(400).json({ message: "Hanya laporan Draft yang bisa dihapus" });
+    }
+
+    // Delete associated files from Supabase storage
+    if (laporan.lampiran && laporan.lampiran.length > 0) {
+      const deleteResult = await deleteLampiranFiles(laporan.lampiran);
+      if (!deleteResult.success) {
+        console.error('Failed to delete some files from Supabase:', deleteResult.errors);
+        // Continue with deletion even if file cleanup fails
+      }
     }
 
     await Laporan.findByIdAndDelete(req.params.id);
