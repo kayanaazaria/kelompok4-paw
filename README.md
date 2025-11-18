@@ -269,7 +269,7 @@ https://drive.google.com/drive/folders/1Jd9orTNhqVqH9QuLWimp3WsCcNGWvOC0?usp=sha
 
 Link YouTube Video Presentasi dan Demonstrasi: https://youtu.be/R2FlEzURQLc
 
-Link Deploy: [kelompok4paw.vercel.app](https://kelompok4paw.vercel.app/)
+Link Deploy: [paw-eta.vercel.app](https://paw-eta.vercel.app)
 
 ## 👥 Pembagian Kontribusi Anggota
 
