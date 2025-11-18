@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import api from "@/services/api";
-import { Navbar, ErrorAlert } from "@/components/shared";
+import { Navbar, ErrorAlert, SuccessAlert } from "@/components/shared";
 import { 
   LaporanHeader, 
   LaporanInfo, 
@@ -22,6 +22,7 @@ export default function DetailLaporanKepalaBidang() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -55,8 +56,9 @@ export default function DetailLaporanKepalaBidang() {
       setActionLoading(true);
       setError(null);
       await api.put(`/api/laporan/${params.id}/approve-kepala`);
-      alert("Laporan berhasil disetujui dan diteruskan ke Direktur SDM");
-      router.push("/dashboard/kepala-bidang");
+      setSuccessMessage("Laporan berhasil disetujui dan diteruskan ke Direktur SDM");
+      // give user a moment to read the success message
+      setTimeout(() => router.push("/dashboard/kepala-bidang"), 1200);
     } catch (err) {
       setError(err.response?.data?.message || "Gagal menyetujui laporan");
     } finally {
@@ -78,9 +80,9 @@ export default function DetailLaporanKepalaBidang() {
         `/api/laporan/${params.id}/reject-kepala`,
         { alasanPenolakan: finalReason }
       );
-      alert("Laporan berhasil ditolak");
+      setSuccessMessage("Laporan berhasil ditolak");
       setShowRejectModal(false);
-      router.push("/dashboard/kepala-bidang");
+      setTimeout(() => router.push("/dashboard/kepala-bidang"), 1200);
     } catch (err) {
       setError(err.response?.data?.message || "Gagal menolak laporan");
     } finally {
@@ -136,6 +138,7 @@ export default function DetailLaporanKepalaBidang() {
         </button>
 
         {error && <ErrorAlert message={error} />}
+        {successMessage && <SuccessAlert message={successMessage} />}
         {/* Header Component */}
         <LaporanHeader laporan={laporan} />
 
