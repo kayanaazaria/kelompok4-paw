@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Edit2, Eye, Download, Trash2, X, Calendar, User, Briefcase, FileText, AlertTriangle } from "lucide-react";
-import axios from "axios";
+import api from "@/services/api";
 
 const ActionButtons = ({ laporan, onEdit, onSubmit, onDelete }) => {
   const [showModal, setShowModal] = useState(false);
@@ -11,13 +11,11 @@ const ActionButtons = ({ laporan, onEdit, onSubmit, onDelete }) => {
 
   const handleDownloadDocument = async () => {
     try {
-      const token = sessionStorage.getItem("token");
       console.log('Starting download for laporan:', laporan._id);
 
-      const response = await axios.get(
-        `http://localhost:5001/finaldoc/laporan/${laporan._id}/download`,
+      const response = await api.get(
+        `/finaldoc/laporan/${laporan._id}/download`,
         {
-          headers: { Authorization: `Bearer ${token}` },
           responseType: 'blob'
         }
       );

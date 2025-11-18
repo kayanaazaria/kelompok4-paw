@@ -1,70 +1,14 @@
-import axios from 'axios';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001/api';
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-});
-
-api.interceptors.request.use(config => {
-  let token = null;
-
-  if (typeof window !== 'undefined') {
-    token = localStorage.getItem('token') || 
-            localStorage.getItem('jwt_token') || 
-            localStorage.getItem('authToken');
-    
-    if (!token) {
-      const userData = localStorage.getItem('userData');
-      if (userData) {
-        try {
-          const parsed = JSON.parse(userData);
-          token = parsed.token;
-        } catch (e) {}
-      }
-    }
-  }
-  
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-}, error => {
-  return Promise.reject(error);
-});
+import api from './api';
 
 export const getFinalDocuments = async () => {
-    const response = await api.get('/laporan/hse/tracking/?status=selesai'); 
+    const response = await api.get('/api/laporan/hse/tracking/?status=selesai'); 
     return response.data;
 };
 
 export const downloadFinalDocument = async (documentId) => {
     try {
-        const fullDownloadUrl = `http://localhost:5001/api/finaldoc/laporan/${documentId}/download`;
-        
-        let token = localStorage.getItem('token') || 
-                    localStorage.getItem('jwt_token') || 
-                    localStorage.getItem('authToken');
-        
-        if (!token) {
-            const userData = localStorage.getItem('userData');
-            if (userData) {
-                try {
-                  const parsed = JSON.parse(userData);
-                  token = parsed.token;
-                } catch (e) {}
-            }
-        }
-
-        if (!token) {
-             throw new Error("Token otorisasi tidak ditemukan.");
-        }
-
-        const response = await axios.get(fullDownloadUrl, {
-            responseType: 'blob', 
-            headers: {
-                Authorization: `Bearer ${token}` 
-            }
+        const response = await api.get(`/finaldoc/laporan/${documentId}/download`, {
+            responseType: 'blob'
         });
 
         const blob = new Blob([response.data], { type: response.headers['content-type'] });
@@ -92,43 +36,16 @@ export const downloadFinalDocument = async (documentId) => {
 };
 
 export const getAllHSEDocuments = async () => {
-    const response = await api.get('/laporan'); 
+    const response = await api.get('/api/laporan'); 
     return response.data;
 };
 
 export const viewFinalDocument = async (documentId) => {
     try {
-        const fullViewUrl = `http://localhost:5001/api/finaldoc/laporan/${documentId}`;
-        
-        let token = localStorage.getItem('token') || 
-                    localStorage.getItem('jwt_token') || 
-                    localStorage.getItem('authToken');
-        
-        if (!token) {
-            const userData = localStorage.getItem('userData');
-            if (userData) {
-                try {
-                  const parsed = JSON.parse(userData);
-                  token = parsed.token;
-                } catch (e) {}
-            }
-        }
-
-        if (!token) {
-             throw new Error("Token otorisasi tidak ditemukan.");
-        }
-
-        const response = await axios.get(fullViewUrl, {
-            headers: {
-                Authorization: `Bearer ${token}` 
-            }
-        });
-
+        const response = await api.get(`/finaldoc/laporan/${documentId}`);
         return response.data;
     } catch (error) {
         console.error("Gagal mengambil dokumen final:", error);
         throw error;
     }
 };
-
-export default api;

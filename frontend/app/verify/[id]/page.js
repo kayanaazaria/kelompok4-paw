@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import api from '@/services/documentService';
+import api from '@/services/api';
 import { CheckCircle, User, Briefcase, Clock } from 'lucide-react';
 
 export default function VerificationPage({ params }) {
@@ -18,7 +18,7 @@ export default function VerificationPage({ params }) {
             
             async function fetchVerificationDetail() {
                 try {
-                    const response = await api.get(`/laporan/${documentId}`);
+                    const response = await api.get(`api/laporan/${documentId}`);
                     setDocumentData(response.data);
                     
                     if (response.data.status !== 'Disetujui' && response.data.status !== 'Selesai' && response.data.status !== 'Disetujui Direktur SDM') {

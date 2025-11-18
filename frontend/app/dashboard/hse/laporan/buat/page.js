@@ -4,9 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navbar, ErrorAlert } from "@/components/shared";
 import { ArrowLeft, Calendar, User, Building2, AlertCircle, FileText, Paperclip, Save } from "lucide-react";
-import axios from "axios";
-
-const API_URL = "http://localhost:5001/api";
+import api from "@/services/api";
 
 const DEPARTMENTS = [
   "Electronical Assembly",
@@ -120,7 +118,7 @@ export default function BuatLaporan() {
         },
       };
 
-      await axios.post(`${API_URL}/laporan`, formDataToSend, config);
+      await api.post(`/api/laporan`, formDataToSend, config);
       router.push("/dashboard/hse");
     } catch (err) {
       setError(err.response?.data?.message || "Gagal membuat laporan");

@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
-
-const API_URL = "http://localhost:5001/api";
+import api from "@/services/api";
 
 const useReportManagement = () => {
   const [reports, setReports] = useState([]);
@@ -25,16 +23,11 @@ const useReportManagement = () => {
   });
   const [formErrors, setFormErrors] = useState({});
 
-  const getAuthHeaders = () => {
-    const token = sessionStorage.getItem("token");
-    return { headers: { Authorization: `Bearer ${token}` } };
-  };
-
   const fetchReports = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get(`${API_URL}/laporan`, getAuthHeaders());
+      const response = await api.get('/api/laporan');
       // Sort reports by updatedAt in descending order (newest first)
       const sortedReports = response.data.sort((a, b) => 
         new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt)
@@ -135,18 +128,16 @@ const useReportManagement = () => {
         formDataToSend.append("attachment", formData.attachment);
       }
 
-      const token = sessionStorage.getItem("token");
       const config = {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
       };
 
       if (editingReport) {
-        await axios.put(`${API_URL}/laporan/${editingReport._id}`, formDataToSend, config);
+        await api.put(`/api/laporan/${editingReport._id}`, formDataToSend, config);
       } else {
-        await axios.post(`${API_URL}/laporan`, formDataToSend, config);
+        await api.post('/api/laporan', formDataToSend, config);
       }
 
       await fetchReports();
@@ -161,7 +152,7 @@ const useReportManagement = () => {
     if (!window.confirm(`Submit laporan "${report.namaPekerja}" untuk persetujuan?`)) return;
 
     try {
-      await axios.put(`${API_URL}/laporan/${report._id}/submit`, {}, getAuthHeaders());
+      await api.put(`/api/laporan/${report._id}/submit`);
       await fetchReports();
     } catch (err) {
       setError(err.response?.data?.message || "Gagal submit laporan");
@@ -183,7 +174,7 @@ const useReportManagement = () => {
     if (!reportToDelete) return;
 
     try {
-      await axios.delete(`${API_URL}/laporan/${reportToDelete._id}`, getAuthHeaders());
+      await api.delete(`/api/laporan/${reportToDelete._id}`);
       await fetchReports();
       closeDeleteModal();
     } catch (err) {

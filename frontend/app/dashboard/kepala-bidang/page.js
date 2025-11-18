@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import api, { API_BASE_URL } from "@/services/api";
+import api from "@/services/api";
 import { Navbar, ErrorAlert } from "@/components/shared";
 import { PageHeader, ReportStats, ReportList } from "@/components/hse";
 import { jwtDecode } from "jwt-decode";
@@ -38,7 +38,7 @@ export default function KepalaBidangDashboard() {
       setLoading(true);
       setError(null);
       
-      const response = await api.get(`${API_BASE_URL}/laporan`);
+      const response = await api.get('/api/laporan');
       console.log("Fetched reports:", response.data);
       
       // Get user's department from token

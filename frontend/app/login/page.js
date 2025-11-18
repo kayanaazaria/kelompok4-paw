@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { login } from '@/services/authService';
 import { getRoleRoute, storeAuthSession } from '@/utils/auth';
 import { LoginLayout } from '@/components/auth';
+import { API_BASE_URL } from '@/services/api';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -40,7 +41,7 @@ export default function LoginPage() {
 
   const handleGoogleLogin = () => {
     // Redirect ke endpoint Google OAuth backend
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+    const backendUrl = API_BASE_URL || 'http://localhost:5001';
     window.location.href = `${backendUrl}/api/auth/google`;
   };
 

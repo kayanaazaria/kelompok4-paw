@@ -1,17 +1,6 @@
-import axios from 'axios';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001/api';
-
-const authClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+import api from './api';
 
 export const login = async (credentials) => {
-  const { data } = await authClient.post('/auth/login', credentials);
+  const { data } = await api.post('/api/auth/login', credentials);
   return data;
 };
-
-export default authClient;

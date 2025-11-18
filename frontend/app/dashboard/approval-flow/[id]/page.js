@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { downloadFinalDocument } from '@/services/documentService'; 
-import api from '@/services/documentService'; 
+import api, {API_BASE_URL} from '@/services/api'; 
 import { ArrowLeft, CheckCircle, AlertCircle, XCircle, Eye, Download, ChevronDown, LogOut, FileEdit } from 'lucide-react';
 import Image from 'next/image';
 import { Poppins } from 'next/font/google';
@@ -112,7 +112,7 @@ export default function ApprovalFlowPage({ params }) {
 
             async function fetchDetail() {
                 try {
-                    const response = await api.get(`/laporan/${currentDocumentId}`);
+                    const response = await api.get(`/api/laporan/${currentDocumentId}`);
                     setDocumentData(response.data);
                 } catch (err) {
                     console.error("Gagal fetching detail dokumen:", err);
@@ -424,7 +424,7 @@ export default function ApprovalFlowPage({ params }) {
                                 <div className="space-y-3">
                                     <button 
                                         onClick={() => {
-                                            window.open(`http://localhost:5001/finaldoc/laporan/${stableDocumentId}`, '_blank');
+                                            window.open(`${API_BASE_URL}/finaldoc/laporan/${stableDocumentId}`, '_blank');
                                         }} 
                                         className="w-full border-2 border-blue-500 text-blue-600 p-4 rounded-lg hover:bg-blue-50 transition font-semibold flex items-center justify-center gap-2"
                                     >

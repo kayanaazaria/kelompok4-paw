@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import api, { API_BASE_URL } from "@/services/api";
+import api from "@/services/api";
 import { Navbar, ErrorAlert } from "@/components/shared";
 import { 
   LaporanHeader, 
@@ -28,7 +28,7 @@ export default function DetailLaporanDirektur() {
       try {
         setLoading(true);
         setError(null);
-        const response = await api.get(`${API_BASE_URL}/laporan/${params.id}`);
+        const response = await api.get(`/api/laporan/${params.id}`);
         setLaporan(response.data);
       } catch (err) {
         setError(err.response?.data?.message || "Gagal mengambil detail laporan");
@@ -51,7 +51,7 @@ export default function DetailLaporanDirektur() {
       setActionLoading(true);
       setError(null);
       await api.put(
-        `${API_BASE_URL}/laporan/${params.id}/approve-direktur`
+        `/api/laporan/${params.id}/approve-direktur`
       );
       alert("Laporan berhasil disetujui");
       router.push("/dashboard/direktur-sdm");
@@ -72,7 +72,7 @@ export default function DetailLaporanDirektur() {
       setActionLoading(true);
       setError(null);
       await api.put(
-        `${API_BASE_URL}/laporan/${params.id}/reject-direktur`,
+        `/api/laporan/${params.id}/reject-direktur`,
         { alasanPenolakan: rejectionReason }
       );
       alert("Laporan berhasil ditolak");

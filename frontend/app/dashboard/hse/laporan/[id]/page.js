@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import api, { API_BASE_URL } from "@/services/api";
+import api from "@/services/api";
 import { Navbar, ErrorAlert, SubmitConfirmModal, DeleteConfirmModal } from "@/components/shared";
 import { 
   LaporanHeader, 
@@ -32,7 +32,7 @@ export default function DetailLaporan() {
     const fetchLaporan = async () => {
       try {
         setLoading(true);
-        const response = await api.get(`${API_BASE_URL}/laporan/${params.id}`);
+        const response = await api.get(`/api/laporan/${params.id}`);
         setLaporan(response.data);
         setEditFormData({
           tanggalKejadian: response.data.tanggalKejadian?.split("T")[0] || "",
@@ -116,7 +116,7 @@ export default function DetailLaporan() {
         },
       };
 
-      await api.put(`${API_BASE_URL}/laporan/${params.id}`, formDataToSend, config);
+      await api.put(`/api/laporan/${params.id}`, formDataToSend, config);
       window.location.reload();
     } catch (err) {
       setError(err.response?.data?.message || "Gagal mengupdate laporan");
@@ -126,8 +126,8 @@ export default function DetailLaporan() {
   const handleSubmitForApproval = async () => {
     try {
       const token = sessionStorage.getItem("token");
-      await axios.put(
-        `${API_URL}/laporan/${laporan._id}/submit`,
+      await api.put(
+        `/api/laporan/${laporan._id}/submit`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -140,8 +140,8 @@ export default function DetailLaporan() {
   const handleDeleteReport = async () => {
     try {
       const token = sessionStorage.getItem("token");
-      await axios.delete(
-        `${API_URL}/laporan/${laporan._id}`,
+      await api.delete(
+        `/api/laporan/${laporan._id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       router.push("/dashboard/hse");
