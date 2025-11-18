@@ -171,34 +171,6 @@ export default function DetailLaporanKepalaBidang() {
                 </div>
               </div>
             )}
-
-            {(laporan.status === "Menunggu Persetujuan Direktur SDM" || laporan.status === "Disetujui") && (
-              <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                <div className="flex items-center gap-2 text-green-700">
-                  <CheckCircle size={20} />
-                  <p className="font-semibold">Laporan telah disetujui</p>
-                </div>
-                {laporan.status === "Menunggu Persetujuan Direktur SDM" && (
-                  <p className="text-sm text-green-600 mt-2">
-                    Menunggu persetujuan dari Direktur SDM
-                  </p>
-                )}
-              </div>
-            )}
-
-            {laporan.status === "Ditolak Kepala Bidang" && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-                <div className="flex items-center gap-2 text-red-700 mb-2">
-                  <XCircle size={20} />
-                  <p className="font-semibold">Laporan ditolak</p>
-                </div>
-                {laporan.alasanPenolakan && (
-                  <p className="text-sm text-red-600 mt-2">
-                    <span className="font-medium">Alasan:</span> {laporan.alasanPenolakan}
-                  </p>
-                )}
-              </div>
-            )}
           </div>
       </div>
 

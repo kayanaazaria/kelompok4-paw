@@ -119,6 +119,7 @@ const ApprovalInfo = ({ laporan }) => {
       {/* Riwayat Persetujuan */}
       <div className="bg-white shadow-sm border border-gray-100 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Riwayat Persetujuan</h3>
+        
         <div className="space-y-3">
           {/* Laporan dibuat - selalu tampil */}
           <div className="bg-blue-50 border border-blue-200 p-4">
@@ -198,6 +199,50 @@ const ApprovalInfo = ({ laporan }) => {
                   <p className="text-sm text-gray-500">{laporan.approvedByDirektur ? getApprovalDate(laporan.approvedByDirektur, laporan.updatedAt) : new Date(laporan.updatedAt).toLocaleDateString("id-ID")}</p>
                 </div>
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* Status Banner */}
+        <div className="-mx-6 border-t border-gray-200 mt-4 px-6 pt-4">
+          {laporan.status === 'Disetujui' && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-green-700">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <p className="font-semibold">Laporan telah disetujui</p>
+              </div>
+            </div>
+          )}
+
+          {laporan.status === 'Menunggu Persetujuan Direktur SDM' && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-green-700">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <p className="font-semibold">Laporan telah disetujui</p>
+              </div>
+              <p className="text-sm text-green-600 mt-2">
+                Menunggu persetujuan dari Direktur SDM
+              </p>
+            </div>
+          )}
+
+          {(laporan.status === 'Ditolak Kepala Bidang' || laporan.status === 'Ditolak Direktur SDM') && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-red-700 mb-2">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <p className="font-semibold">Laporan ditolak</p>
+              </div>
+              {laporan.alasanPenolakan && (
+                <p className="text-sm text-red-600">
+                  <span className="font-medium">Alasan:</span> {laporan.alasanPenolakan}
+                </p>
+              )}
             </div>
           )}
         </div>
