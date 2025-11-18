@@ -36,13 +36,12 @@ export default function Navbar() {
 
   const handleChangePassword = async (formData) => {
     try {
-      const response = await api.post('/users/change-password', {
+      const response = await api.post('/api/users/change-password', {
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword
       });
       
-      alert(response.data.message || 'Password berhasil diubah');
-      setShowChangePasswordModal(false);
+      // Success akan ditampilkan di modal
       setShowDropdown(false);
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Gagal mengubah password');
