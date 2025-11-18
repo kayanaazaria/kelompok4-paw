@@ -1,10 +1,9 @@
-import { Inter } from 'next/font/google';
-import './globals.css';
 import { Poppins } from 'next/font/google';
+import './globals.css';
 
 const poppins = Poppins({ 
     subsets: ['latin'],
-    weight: ['400', '600', '700'], 
+    weight: ['300', '400', '500', '600', '700', '800'], 
     variable: '--font-poppins', 
     display: 'swap',
 });
@@ -15,12 +14,11 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${poppins.variable} font-sans`}>
+    <html lang="en" className={poppins.variable}>
       <head>
         <link rel="icon" href="/favicon.ico" />
-        <link rel="preload" href="/path-to-font.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       </head>
-      <body suppressHydrationWarning={true}>
+      <body className={poppins.className} suppressHydrationWarning={true}>
         {children}
       </body>
     </html>

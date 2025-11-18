@@ -40,7 +40,7 @@ export const getFinalDocuments = async () => {
 
 export const downloadFinalDocument = async (documentId) => {
     try {
-        const fullDownloadUrl = `http://localhost:5001/api/finaldoc/laporan/${documentId}/download`;
+        const fullDownloadUrl = `http://localhost:5001/finaldoc/laporan/${documentId}/download`;
         
         let token = localStorage.getItem('token') || 
                     localStorage.getItem('jwt_token') || 
@@ -98,7 +98,7 @@ export const getAllHSEDocuments = async () => {
 
 export const viewFinalDocument = async (documentId) => {
     try {
-        const fullViewUrl = `http://localhost:5001/api/finaldoc/laporan/${documentId}`;
+        const fullViewUrl = `http://localhost:5001/finaldoc/laporan/${documentId}/pdf`;
         
         let token = localStorage.getItem('token') || 
                     localStorage.getItem('jwt_token') || 

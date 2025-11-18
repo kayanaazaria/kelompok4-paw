@@ -1,234 +1,247 @@
 import React from "react";
-import { User, Clock, CheckCircle, XCircle, FileText } from "lucide-react";
 
-const getStatusInfo = (status) => {
-  if (status === "Draft") {
-    return { icon: <FileText className="w-5 h-5" />, bg: "bg-gray-100", text: "text-gray-700" };
+// Helper function to determine step state based on laporan status
+const getStepState = (step, laporan) => {
+  const s = laporan?.status;
+
+  if (s === 'Draft') {
+    if (step === 1) return 'created_draft'; 
+    if (step === 2 || step === 3) return 'pending_draft'; 
+    return 'skipped';
   }
-  if (status === "Menunggu Persetujuan Kepala Bidang" || status === "Menunggu Persetujuan Direktur SDM") {
-    return { icon: <Clock className="w-5 h-5" />, bg: "bg-yellow-100", text: "text-yellow-700" };
+  
+  if (step === 1) return 'done';
+
+  if (step === 2) {
+    if (s === 'Ditolak Kepala Bidang') return 'rejected';
+    if (s === 'Menunggu Persetujuan Kepala Bidang') return 'current';
+    return 'done';
   }
-  if (status === "Disetujui") {
-    return { icon: <CheckCircle className="w-5 h-5" />, bg: "bg-green-100", text: "text-green-700" };
+
+  if (step === 3) {
+    if (s === 'Disetujui') return 'done';
+    if (s === 'Menunggu Persetujuan Direktur SDM') return 'current';
+    if (s === 'Ditolak Direktur SDM') return 'rejected';
+    if (s === 'Ditolak Kepala Bidang') return 'skipped';
+    return 'pending';
   }
-  if (status === "Ditolak Kepala Bidang" || status === "Ditolak Direktur SDM") {
-    return { icon: <XCircle className="w-5 h-5" />, bg: "bg-red-100", text: "text-red-700" };
+
+  if (step === 4) { 
+    if (s === 'Disetujui') return 'done';
+    return 'skipped';
   }
-  return { icon: <FileText className="w-5 h-5" />, bg: "bg-gray-100", text: "text-gray-700" };
+
+  return 'pending';
+};
+
+const getTimelineColor = (state) => {
+  switch(state) {
+    case 'done':
+      return 'bg-green-600';
+    case 'current':
+      return 'bg-yellow-400';
+    case 'rejected':
+      return 'bg-red-500';
+    case 'created_draft': 
+    case 'pending_draft':
+    case 'pending': 
+    default:
+      return 'bg-gray-400'; 
+  }
+};
+
+const getInnerIcon = (state) => {
+  if (state === 'done') {
+    return (
+      <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  if (state === 'rejected') {
+    return (
+      <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  if (state === 'current' || state.includes('pending') || state.includes('draft')) {
+    return (
+      <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+      </svg>
+    );
+  }
+  return (
+    <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  );
 };
 
 const ApprovalInfo = ({ laporan }) => {
-  const statusInfo = getStatusInfo(laporan.status);
+  const isDraft = laporan.status === "Draft";
+
+  // Helper to get approval date
+  const getApprovalDate = (approver, fallbackDate) => {
+    if (approver?.approvedAt) return new Date(approver.approvedAt).toLocaleDateString("id-ID");
+    if (approver?.signedAt) return new Date(approver.signedAt).toLocaleDateString("id-ID");
+    if (fallbackDate) return new Date(fallbackDate).toLocaleDateString("id-ID");
+    return new Date().toLocaleDateString("id-ID");
+  };
+
+  const approvalSteps = [
+    { 
+      id: 1, 
+      label: isDraft ? 'Laporan Dibuat' : 'Laporan Terkirim', 
+      detail: `${laporan.createdByHSE?.username || 'HSE'} • ${new Date(laporan.createdAt).toLocaleDateString("id-ID")}`,
+      person: laporan.createdByHSE?.username || 'HSE'
+    },
+    { 
+      id: 2, 
+      label: 'Persetujuan Kepala Bidang', 
+      detail: laporan.signedByKabid 
+        ? `${laporan.signedByKabid.username} • ${getApprovalDate(laporan.signedByKabid, laporan.updatedAt)}`
+        : 'Menunggu • Belum disetujui',
+      person: laporan.signedByKabid?.username || 'Kepala Bidang'
+    },
+    { 
+      id: 3, 
+      label: 'Persetujuan Direktur SDM', 
+      detail: (laporan.status === 'Disetujui' || laporan.approvedByDirektur)
+        ? `${laporan.approvedByDirektur?.username || 'Direktur SDM'} • ${getApprovalDate(laporan.approvedByDirektur, laporan.updatedAt)}`
+        : 'Menunggu • Belum disetujui',
+      person: laporan.approvedByDirektur?.username || 'Direktur SDM'
+    },
+    { 
+      id: 4, 
+      label: 'Selesai', 
+      detail: 'Proses persetujuan telah selesai',
+      person: ''
+    }
+  ];
 
   return (
-    <div className="p-4 sm:p-6 bg-gray-50">
-      <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Informasi Persetujuan</h2>
-      
-      <div className="space-y-3 sm:space-y-4">
-        {/* Created By HSE */}
-        <div className="flex items-center gap-3 p-4 bg-white rounded-lg border border-gray-200">
-          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-            <User className="w-5 h-5 text-blue-600" />
-          </div>
-          <div className="flex-1">
-            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Dibuat oleh HSE</p>
-            <p className="font-semibold text-gray-900">
-              {laporan.createdByHSE?.username || "-"}
-            </p>
-            {laporan.createdByHSE?.email && (
-              <p className="text-sm text-gray-600">{laporan.createdByHSE.email}</p>
-            )}
-          </div>
-          <div className="px-3 py-1 bg-blue-50 rounded-full">
-            <span className="text-xs font-medium text-blue-700">HSE</span>
+    <div className="space-y-0">
+      {/* Alur Persetujuan - Timeline Vertical */}
+      <div className="bg-white shadow-sm border border-gray-100 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">Alur Persetujuan</h3>
+
+        <div>
+          <div className="">
+            {approvalSteps.map((step, index) => {
+              const state = getStepState(step.id, laporan);
+              if (state === 'skipped') return null;
+
+              const isLast = index === approvalSteps.length - 1 || getStepState(approvalSteps[index + 1]?.id, laporan) === 'skipped';
+              const nextState = !isLast ? getStepState(approvalSteps[index + 1]?.id, laporan) : null;
+
+              return (
+                <div key={step.id} className="flex items-start gap-4">
+                  <div className="w-16 flex flex-col items-center">
+                    <div className={`${getTimelineColor(state)} ${state === 'done' ? 'animate-pop' : ''} w-10 h-10 rounded-full flex items-center justify-center z-10`}>
+                      {getInnerIcon(state)}
+                    </div>
+                    {!isLast && nextState !== 'skipped' && (
+                      <div className={`${getTimelineColor(nextState)} w-0.5 h-8`}></div>
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">{step.label}</p>
+                    <p className="text-sm text-gray-500">{step.detail}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
+      </div>
 
-        {/* Kepala Bidang */}
-        <div className={`flex items-center gap-3 p-4 rounded-lg border ${
-          laporan.signedByKabid 
-            ? "bg-white border-green-200" 
-            : laporan.status === "Ditolak Kepala Bidang"
-            ? "bg-white border-red-200"
-            : "bg-gray-50 border-gray-200"
-        }`}>
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-            laporan.signedByKabid 
-              ? "bg-green-100" 
-              : laporan.status === "Ditolak Kepala Bidang"
-              ? "bg-red-100"
-              : "bg-gray-100"
-          }`}>
-            {laporan.signedByKabid ? (
-              <CheckCircle className="w-5 h-5 text-green-600" />
-            ) : laporan.status === "Ditolak Kepala Bidang" ? (
-              <XCircle className="w-5 h-5 text-red-600" />
-            ) : (
-              <Clock className="w-5 h-5 text-gray-400" />
-            )}
-          </div>
-          <div className="flex-1">
-            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Kepala Bidang</p>
-            <p className={`font-semibold ${
-              laporan.signedByKabid 
-                ? "text-gray-900" 
-                : laporan.status === "Ditolak Kepala Bidang"
-                ? "text-red-700"
-                : "text-gray-400"
-            }`}>
-              {laporan.signedByKabid?.username || 
-               (laporan.status === "Ditolak Kepala Bidang" ? "Ditolak" : "Menunggu Persetujuan")}
-            </p>
-            {laporan.signedByKabid?.email && (
-              <p className="text-sm text-gray-600">{laporan.signedByKabid.email}</p>
-            )}
-            {laporan.signedByKabid?.department && (
-              <p className="text-sm text-gray-500">Dept. {laporan.signedByKabid.department}</p>
-            )}
-          </div>
-          <div className={`px-3 py-1 rounded-full ${
-            laporan.signedByKabid 
-              ? "bg-green-50" 
-              : laporan.status === "Ditolak Kepala Bidang"
-              ? "bg-red-50"
-              : "bg-gray-100"
-          }`}>
-            <span className={`text-xs font-medium ${
-              laporan.signedByKabid 
-                ? "text-green-700" 
-                : laporan.status === "Ditolak Kepala Bidang"
-                ? "text-red-700"
-                : "text-gray-600"
-            }`}>
-              {laporan.signedByKabid 
-                ? "Disetujui" 
-                : laporan.status === "Ditolak Kepala Bidang"
-                ? "Ditolak"
-                : "Pending"}
-            </span>
-          </div>
-        </div>
-
-        {/* Direktur SDM */}
-        <div className={`flex items-center gap-3 p-4 rounded-lg border ${
-          laporan.approvedByDirektur 
-            ? "bg-white border-green-200" 
-            : laporan.status === "Ditolak Direktur SDM"
-            ? "bg-white border-red-200"
-            : "bg-gray-50 border-gray-200"
-        }`}>
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-            laporan.approvedByDirektur 
-              ? "bg-green-100" 
-              : laporan.status === "Ditolak Direktur SDM"
-              ? "bg-red-100"
-              : "bg-gray-100"
-          }`}>
-            {laporan.approvedByDirektur ? (
-              <CheckCircle className="w-5 h-5 text-green-600" />
-            ) : laporan.status === "Ditolak Direktur SDM" ? (
-              <XCircle className="w-5 h-5 text-red-600" />
-            ) : (
-              <Clock className="w-5 h-5 text-gray-400" />
-            )}
-          </div>
-          <div className="flex-1">
-            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Direktur SDM</p>
-            <p className={`font-semibold ${
-              laporan.approvedByDirektur 
-                ? "text-gray-900" 
-                : laporan.status === "Ditolak Direktur SDM"
-                ? "text-red-700"
-                : "text-gray-400"
-            }`}>
-              {laporan.approvedByDirektur?.username || 
-               (laporan.status === "Ditolak Direktur SDM" ? "Ditolak" : "Menunggu Persetujuan")}
-            </p>
-            {laporan.approvedByDirektur?.email && (
-              <p className="text-sm text-gray-600">{laporan.approvedByDirektur.email}</p>
-            )}
-          </div>
-          <div className={`px-3 py-1 rounded-full ${
-            laporan.approvedByDirektur 
-              ? "bg-green-50" 
-              : laporan.status === "Ditolak Direktur SDM"
-              ? "bg-red-50"
-              : "bg-gray-100"
-          }`}>
-            <span className={`text-xs font-medium ${
-              laporan.approvedByDirektur 
-                ? "text-green-700" 
-                : laporan.status === "Ditolak Direktur SDM"
-                ? "text-red-700"
-                : "text-gray-600"
-            }`}>
-              {laporan.approvedByDirektur 
-                ? "Disetujui" 
-                : laporan.status === "Ditolak Direktur SDM"
-                ? "Ditolak"
-                : "Pending"}
-            </span>
-          </div>
-        </div>
-
-        {/* Status Timeline */}
-        <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">Timeline Status</h3>
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <p className="text-sm text-gray-700">
-                <span className="font-medium">Draft dibuat</span> - {new Date(laporan.createdAt).toLocaleDateString("id-ID")}
-              </p>
-            </div>
-            {laporan.status !== "Draft" && (
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <p className="text-sm text-gray-700">
-                  <span className="font-medium">Laporan disubmit</span>
-                </p>
+      {/* Riwayat Persetujuan */}
+      <div className="bg-white shadow-sm border border-gray-100 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Riwayat Persetujuan</h3>
+        <div className="space-y-3">
+          {/* Laporan dibuat - selalu tampil */}
+          <div className="bg-blue-50 border border-blue-200 p-4">
+            <div className="flex items-start gap-3">
+              <span className="text-blue-600 mt-1">📋</span>
+              <div>
+                <p className="font-semibold text-gray-900">Laporan dibuat</p>
+                <p className="text-sm text-gray-500">{laporan.createdByHSE?.username || "-"}</p>
+                <p className="text-sm text-gray-500">{laporan.createdByHSE?.email || "-"}</p>
+                <p className="text-sm text-gray-500">{new Date(laporan.createdAt).toLocaleDateString("id-ID")}</p>
               </div>
-            )}
-            {(laporan.signedByKabid || laporan.status === "Ditolak Kepala Bidang") && (
-              <div className="flex items-center gap-3">
-                <div className={`w-2 h-2 rounded-full ${
-                  laporan.status === "Ditolak Kepala Bidang" ? "bg-red-500" : "bg-green-500"
-                }`}></div>
-                <p className="text-sm text-gray-700">
-                  <span className="font-medium">
-                    {laporan.status === "Ditolak Kepala Bidang" ? "Ditolak" : "Disetujui"} oleh Kepala Bidang
-                  </span>
-                </p>
-              </div>
-            )}
-            {(laporan.approvedByDirektur || laporan.status === "Ditolak Direktur SDM") && (
-              <div className="flex items-center gap-3">
-                <div className={`w-2 h-2 rounded-full ${
-                  laporan.status === "Ditolak Direktur SDM" ? "bg-red-500" : "bg-green-500"
-                }`}></div>
-                <p className="text-sm text-gray-700">
-                  <span className="font-medium">
-                    {laporan.status === "Ditolak Direktur SDM" ? "Ditolak" : "Disetujui"} oleh Direktur SDM
-                  </span>
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Current Status */}
-        <div className="mt-4 p-4 bg-gradient-to-r from-emerald-50 to-blue-50 rounded-lg border border-emerald-200">
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${statusInfo.bg}`}>
-              <span className={statusInfo.text}>{statusInfo.icon}</span>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600 mb-1">Status Saat Ini</p>
-              <p className={`font-bold text-lg ${statusInfo.text}`}>
-                {laporan.status}
-              </p>
             </div>
           </div>
+
+          {/* Ditolak oleh Kepala Bidang */}
+          {laporan.status === 'Ditolak Kepala Bidang' && (
+            <div className="bg-red-50 border border-red-200 p-4">
+              <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 text-red-600 mt-0.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <div>
+                  <p className="font-semibold text-gray-900">Ditolak oleh Kepala Bidang</p>
+                  <p className="text-sm text-gray-500">{laporan.signedByKabid?.username || "-"}</p>
+                  <p className="text-sm text-gray-500">{laporan.signedByKabid?.email || "-"}</p>
+                  <p className="text-sm text-gray-500">{getApprovalDate(laporan.signedByKabid, laporan.updatedAt)}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Disetujui oleh Kepala Bidang - tampil jika sudah disetujui */}
+          {laporan.signedByKabid && laporan.status !== 'Ditolak Kepala Bidang' && laporan.status !== 'Menunggu Persetujuan Kepala Bidang' && (
+            <div className="bg-green-50 border border-green-200 p-4">
+              <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 text-green-600 mt-0.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <div>
+                  <p className="font-semibold text-gray-900">Disetujui oleh Kepala Bidang</p>
+                  <p className="text-sm text-gray-500">{laporan.signedByKabid.username || "-"}</p>
+                  <p className="text-sm text-gray-500">{laporan.signedByKabid.email || "-"}</p>
+                  <p className="text-sm text-gray-500">{getApprovalDate(laporan.signedByKabid, laporan.updatedAt)}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Ditolak oleh Direktur SDM */}
+          {laporan.status === 'Ditolak Direktur SDM' && laporan.approvedByDirektur && (
+            <div className="bg-red-50 border border-red-200 p-4">
+              <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 text-red-600 mt-0.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <div>
+                  <p className="font-semibold text-gray-900">Ditolak oleh Direktur SDM</p>
+                  <p className="text-sm text-gray-500">{laporan.approvedByDirektur?.username || "-"}</p>
+                  <p className="text-sm text-gray-500">{laporan.approvedByDirektur?.email || "-"}</p>
+                  <p className="text-sm text-gray-500">{getApprovalDate(laporan.approvedByDirektur, laporan.updatedAt)}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Disetujui oleh Direktur SDM - tampil jika sudah disetujui */}
+          {laporan.status === 'Disetujui' && (
+            <div className="bg-green-50 border border-green-200 p-4">
+              <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 text-green-600 mt-0.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <div>
+                  <p className="font-semibold text-gray-900">Disetujui oleh Direktur SDM</p>
+                  <p className="text-sm text-gray-500">{laporan.approvedByDirektur?.username || "Direktur SDM"}</p>
+                  <p className="text-sm text-gray-500">{laporan.approvedByDirektur?.email || "-"}</p>
+                  <p className="text-sm text-gray-500">{laporan.approvedByDirektur ? getApprovalDate(laporan.approvedByDirektur, laporan.updatedAt) : new Date(laporan.updatedAt).toLocaleDateString("id-ID")}</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
