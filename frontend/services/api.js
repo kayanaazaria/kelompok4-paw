@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001';
+// Use /api for production (Vercel), localhost for development
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 
+  (typeof window !== 'undefined' && window.location.hostname === 'localhost' 
+    ? 'http://localhost:5001' 
+    : '/api');
 
 const api = axios.create({
   baseURL: API_BASE_URL,

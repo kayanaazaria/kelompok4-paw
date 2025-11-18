@@ -41,7 +41,7 @@ export default function LoginPage() {
 
   const handleGoogleLogin = () => {
     // Redirect ke endpoint Google OAuth backend
-    const backendUrl = (API_BASE_URL || 'http://localhost:5001').replace(/\/$/, ''); // Remove trailing slash
+    const backendUrl = API_BASE_URL || 'http://localhost:5001';
     window.location.href = `${backendUrl}/api/auth/google`;
   };
 
