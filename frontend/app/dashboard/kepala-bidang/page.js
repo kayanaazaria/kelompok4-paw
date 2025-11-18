@@ -210,6 +210,7 @@ export default function KepalaBidangDashboard() {
           onViewReport={handleViewReport}
           getStatusBadge={getStatusBadge}
           getTimeSince={getTimeSince}
+          showDraftFilter={false}
         />
       </div>
     </div>

@@ -12,9 +12,18 @@ export default function ReportList({
   setActiveCard,
   onViewReport,
   getStatusBadge,
-  getTimeSince
+  getTimeSince,
+  showDraftFilter = true
 }) {
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+
+  const filterOptions = [
+    { value: "all", label: "Semua Status" },
+    ...(showDraftFilter ? [{ value: "draft", label: "Draft" }] : []),
+    { value: "menunggu", label: "Menunggu" },
+    { value: "disetujui", label: "Disetujui" },
+    { value: "ditolak", label: "Ditolak" }
+  ];
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100">
@@ -69,13 +78,7 @@ export default function ReportList({
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setShowFilterDropdown(false)}></div>
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-20">
-                  {[
-                    { value: "all", label: "Semua Status" },
-                    { value: "draft", label: "Draft" },
-                    { value: "menunggu", label: "Menunggu" },
-                    { value: "disetujui", label: "Disetujui" },
-                    { value: "ditolak", label: "Ditolak" }
-                  ].map((option) => (
+                  {filterOptions.map((option) => (
                     <button
                       key={option.value}
                       onClick={() => {

@@ -165,6 +165,7 @@ export default function DirekturSDMDashboard() {
           onViewReport={handleViewReport}
           getStatusBadge={getStatusBadge}
           getTimeSince={getTimeSince}
+          showDraftFilter={false}
         />
       </div>  
     </div>  
