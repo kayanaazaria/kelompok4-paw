@@ -109,13 +109,13 @@ export default function HSEDashboard() {
   };
 
   const getStatusBadge = (status) => {
-    if (status === "Draft") return <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">Draft</span>;
+    if (status === "Draft") return <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">Draft</span>;
     if (status === "Menunggu Persetujuan Kepala Bidang" || status === "Menunggu Persetujuan Direktur SDM") 
-      return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">Menunggu</span>;
-    if (status === "Disetujui") return <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Selesai</span>;
+      return <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">Menunggu</span>;
+    if (status === "Disetujui") return <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Disetujui</span>;
     if (status === "Ditolak Kepala Bidang" || status === "Ditolak Direktur SDM") 
-      return <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">Ditolak</span>;
-    return <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">{status}</span>;
+      return <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">Ditolak</span>;
+    return <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">{status}</span>;
   };
 
   const getTimeSince = (date) => {

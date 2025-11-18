@@ -1,80 +1,55 @@
 import React from "react";
+import { ApprovalTimeline } from "../../shared/ApprovalTimeline";
 
 // Helper function to determine step state based on laporan status
 const getStepState = (step, laporan) => {
   const s = laporan?.status;
 
+  // Jika Draft, semua step adalah draft
   if (s === 'Draft') {
-    if (step === 1) return 'created_draft'; 
-    if (step === 2 || step === 3) return 'pending_draft'; 
+    if (step === 1) return 'draft'; 
+    if (step === 2 || step === 3 || step === 4) return 'draft'; 
     return 'skipped';
   }
 
+  // Step 1 selalu done (laporan sudah dibuat)
   if (step === 1) return 'done';
 
+  // Jika ditolak di step 2 (Kepala Bidang)
+  if (s === 'Ditolak Kepala Bidang') {
+    if (step === 2) return 'rejected';
+    if (step === 3 || step === 4) return 'rejected'; // Semua step setelahnya juga rejected
+    return 'done';
+  }
+
+  // Jika ditolak di step 3 (Direktur SDM)
+  if (s === 'Ditolak Direktur SDM') {
+    if (step === 2) return 'done'; // Kabid sudah approve
+    if (step === 3) return 'rejected';
+    if (step === 4) return 'rejected'; // Step setelahnya juga rejected
+    return 'done';
+  }
+
+  // Step 2 - Persetujuan Kepala Bidang
   if (step === 2) {
-    if (s === 'Ditolak Kepala Bidang') return 'rejected';
     if (s === 'Menunggu Persetujuan Kepala Bidang') return 'current';
     return 'done';
   }
+
+  // Step 3 - Persetujuan Direktur SDM
   if (step === 3) {
     if (s === 'Disetujui') return 'done';
     if (s === 'Menunggu Persetujuan Direktur SDM') return 'current';
-    if (s === 'Ditolak Direktur SDM') return 'rejected';
-    if (s === 'Ditolak Kepala Bidang') return 'skipped';
     return 'pending';
   }
+
+  // Step 4 - Selesai
   if (step === 4) { 
     if (s === 'Disetujui') return 'done';
-    return 'skipped';
+    return 'pending';
   }
+
   return 'pending';
-};
-
-const getTimelineColor = (state) => {
-  switch(state) {
-    case 'done':
-      return 'bg-green-600';
-    case 'current':
-      return 'bg-yellow-400';
-    case 'rejected':
-      return 'bg-red-500';
-    case 'created_draft': 
-    case 'pending_draft':
-    case 'pending': 
-    default:
-      return 'bg-gray-400'; 
-  }
-};
-
-const getInnerIcon = (state) => {
-  if (state === 'done') {
-    return (
-      <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    );
-  }
-  if (state === 'rejected') {
-    return (
-      <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    );
-  }
-  if (state === 'current' || state.includes('pending') || state.includes('draft')) {
-    return (
-      <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-      </svg>
-    );
-  }
-  return (
-    <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="2" />
-    </svg>
-  );
 };
 
 const ApprovalInfo = ({ laporan }) => {
@@ -93,29 +68,43 @@ const ApprovalInfo = ({ laporan }) => {
       id: 1, 
       label: isDraft ? 'Laporan Dibuat' : 'Laporan Terkirim', 
       detail: `${laporan.createdByHSE?.username || 'HSE'} • ${new Date(laporan.createdAt).toLocaleDateString("id-ID")}`,
-      person: laporan.createdByHSE?.username || 'HSE'
+      person: laporan.createdByHSE?.username || 'HSE',
+      status: getStepState(1, laporan)
     },
     { 
       id: 2, 
       label: 'Persetujuan Kepala Bidang', 
-      detail: laporan.signedByKabid 
-        ? `${laporan.signedByKabid.username} • ${getApprovalDate(laporan.signedByKabid, laporan.updatedAt)}`
-        : 'Menunggu • Belum disetujui',
-      person: laporan.signedByKabid?.username || 'Kepala Bidang'
+      detail: laporan.status === 'Ditolak Kepala Bidang'
+        ? `Ditolak oleh ${laporan.signedByKabid?.username || 'Kepala Bidang'} • ${getApprovalDate(laporan.signedByKabid, laporan.updatedAt)}`
+        : laporan.signedByKabid 
+          ? `${laporan.signedByKabid.username} • ${getApprovalDate(laporan.signedByKabid, laporan.updatedAt)}`
+          : 'Menunggu • Belum disetujui',
+      person: laporan.signedByKabid?.username || 'Kepala Bidang',
+      status: getStepState(2, laporan)
     },
     { 
       id: 3, 
       label: 'Persetujuan Direktur SDM', 
-      detail: (laporan.status === 'Disetujui' || laporan.approvedByDirektur)
-        ? `${laporan.approvedByDirektur?.username || 'Direktur SDM'} • ${getApprovalDate(laporan.approvedByDirektur, laporan.updatedAt)}`
-        : 'Menunggu • Belum disetujui',
-      person: laporan.approvedByDirektur?.username || 'Direktur SDM'
+      detail: laporan.status === 'Ditolak Direktur SDM'
+        ? `Ditolak oleh ${laporan.approvedByDirektur?.username || 'Direktur SDM'} • ${getApprovalDate(laporan.approvedByDirektur, laporan.updatedAt)}`
+        : (laporan.status === 'Disetujui' || laporan.approvedByDirektur)
+          ? `${laporan.approvedByDirektur?.username || 'Direktur SDM'} • ${getApprovalDate(laporan.approvedByDirektur, laporan.updatedAt)}`
+          : laporan.status === 'Ditolak Kepala Bidang'
+            ? 'Dibatalkan'
+            : 'Menunggu • Belum disetujui',
+      person: laporan.approvedByDirektur?.username || 'Direktur SDM',
+      status: getStepState(3, laporan)
     },
     { 
       id: 4, 
       label: 'Selesai', 
-      detail: 'Proses persetujuan telah selesai',
-      person: ''
+      detail: laporan.status === 'Disetujui' 
+        ? 'Proses persetujuan telah selesai'
+        : laporan.status?.includes('Ditolak')
+          ? 'Proses dibatalkan'
+          : 'Menunggu penyelesaian',
+      person: '',
+      status: getStepState(4, laporan)
     }
   ];
 
@@ -124,36 +113,8 @@ const ApprovalInfo = ({ laporan }) => {
       {/* Alur Persetujuan - Timeline Vertical */}
       <div className="bg-white shadow-sm border border-gray-100 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-6">Alur Persetujuan</h3>
-
-        <div>
-          <div className="">
-            {approvalSteps.map((step, index) => {
-              const state = getStepState(step.id, laporan);
-              if (state === 'skipped') return null;
-        const isLast = index === approvalSteps.length - 1 || getStepState(approvalSteps[index + 1]?.id, laporan) === 'skipped';
-              const nextState = !isLast ? getStepState(approvalSteps[index + 1]?.id, laporan) : null;
-
-              return (
-                <div key={step.id} className="flex items-start gap-4">
-                  <div className="w-16 flex flex-col items-center">
-                    <div className={`${getTimelineColor(state)} ${state === 'done' ? 'animate-pop' : ''} w-10 h-10 rounded-full flex items-center justify-center z-10`}>
-                      {getInnerIcon(state)}
-                    </div>
-                    {!isLast && nextState !== 'skipped' && (
-                      <div className={`${getTimelineColor(nextState)} w-0.5 h-8`}></div>
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">{step.label}</p>
-                    <p className="text-sm text-gray-500">{step.detail}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        </div>
+        <ApprovalTimeline steps={approvalSteps} />
+      </div>
 
       {/* Riwayat Persetujuan */}
       <div className="bg-white shadow-sm border border-gray-100 p-6">

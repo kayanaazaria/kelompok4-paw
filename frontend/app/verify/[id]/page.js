@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import api from '@/services/api';
 import { CheckCircle, User, Briefcase, Clock } from 'lucide-react';
+import { ApprovalTimelineCompact } from '@/components/shared/ApprovalTimeline';
 
 export default function VerificationPage({ params }) {
     const pathname = usePathname(); 
@@ -124,65 +125,32 @@ export default function VerificationPage({ params }) {
                     {/* Alur Persetujuan */}
                     <div className="mb-6">
                         <h3 className="font-semibold text-gray-900 mb-3">Alur Persetujuan</h3>
-                        <div className="space-y-3">
-                            {/* Laporan Terkirim */}
-                            <div className="flex items-start gap-3 bg-green-50 p-4 rounded-lg">
-                                <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="font-semibold text-gray-900">Laporan Terkirim</p>
-                                    <p className="text-sm text-gray-600">
-                                        Disetujui oleh HSE • {documentData.createdByHSE?.username || 'HSE'} • {new Date(documentData.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'numeric', year: 'numeric' })}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Persetujuan Kepala Bidang */}
-                            <div className="flex items-start gap-3 bg-green-50 p-4 rounded-lg">
-                                <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="font-semibold text-gray-900">Persetujuan Kepala Bidang</p>
-                                    <p className="text-sm text-gray-600">
-                                        Disetujui oleh {documentData.signedByKabid?.username || 'kabid_software1'} • {documentData.kabidSignedDate ? new Date(documentData.kabidSignedDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'numeric', year: 'numeric' }) : '30/9/2025'}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Persetujuan Direktur SDM */}
-                            <div className="flex items-start gap-3 bg-green-50 p-4 rounded-lg">
-                                <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="font-semibold text-gray-900">Persetujuan Direktur SDM</p>
-                                    <p className="text-sm text-gray-600">
-                                        Disetujui oleh {documentData.approvedByDirektur?.username || 'DirekturSDM1'} • {documentData.direkturApprovedDate ? new Date(documentData.direkturApprovedDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'numeric', year: 'numeric' }) : '30/9/2025'}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Selesai */}
-                            <div className="flex items-start gap-3 bg-green-50 p-4 rounded-lg">
-                                <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="font-semibold text-gray-900">Selesai</p>
-                                    <p className="text-sm text-gray-600">Proses persetujuan telah selesai</p>
-                                </div>
-                            </div>
-                        </div>
+                        <ApprovalTimelineCompact steps={[
+                            {
+                                id: 1,
+                                label: 'Laporan Terkirim',
+                                detail: `Disetujui oleh HSE • ${documentData.createdByHSE?.username || 'HSE'} • ${new Date(documentData.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'numeric', year: 'numeric' })}`,
+                                status: 'done'
+                            },
+                            {
+                                id: 2,
+                                label: 'Persetujuan Kepala Bidang',
+                                detail: `Disetujui oleh ${documentData.signedByKabid?.username || 'kabid_software1'} • ${documentData.kabidSignedDate ? new Date(documentData.kabidSignedDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'numeric', year: 'numeric' }) : '30/9/2025'}`,
+                                status: 'done'
+                            },
+                            {
+                                id: 3,
+                                label: 'Persetujuan Direktur SDM',
+                                detail: `Disetujui oleh ${documentData.approvedByDirektur?.username || 'DirekturSDM1'} • ${documentData.direkturApprovedDate ? new Date(documentData.direkturApprovedDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'numeric', year: 'numeric' }) : '30/9/2025'}`,
+                                status: 'done'
+                            },
+                            {
+                                id: 4,
+                                label: 'Selesai',
+                                detail: 'Proses persetujuan telah selesai',
+                                status: 'done'
+                            }
+                        ]} />
                     </div>
 
                     {/* Footer Info */}

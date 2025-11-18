@@ -8,7 +8,7 @@ const getStatusBadgeColor = (status) => {
     case "Menunggu Persetujuan Kepala Bidang":
       return "bg-yellow-100 text-yellow-800";
     case "Menunggu Persetujuan Direktur SDM":
-      return "bg-blue-100 text-blue-800";
+      return "bg-yellow-100 text-yellow-800";
     case "Disetujui":
       return "bg-green-100 text-green-800";
     case "Ditolak Kepala Bidang":

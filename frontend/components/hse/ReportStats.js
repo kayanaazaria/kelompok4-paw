@@ -17,7 +17,7 @@ export default function ReportStats({ stats, activeCard, onCardClick, hideDraft 
               <p className="text-gray-500 text-xs mt-1">{stats.draft === 0 ? "Tidak ada" : `${stats.draft} laporan`}</p>
             </div>
             <div className="p-2 sm:p-3 bg-gray-100 rounded-full flex-shrink-0">
-              <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
+              <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-gray-800" />
             </div>
           </div>
         </button>
@@ -36,7 +36,7 @@ export default function ReportStats({ stats, activeCard, onCardClick, hideDraft 
             <p className="text-gray-500 text-xs mt-1">{stats.menunggu} laporan</p>
           </div>
           <div className="p-2 sm:p-3 bg-yellow-100 rounded-full flex-shrink-0">
-            <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-600" />
+            <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-800" />
           </div>
         </div>
       </button>
@@ -54,7 +54,7 @@ export default function ReportStats({ stats, activeCard, onCardClick, hideDraft 
             <p className="text-gray-500 text-xs mt-1">{stats.disetujui} laporan</p>
           </div>
           <div className="p-2 sm:p-3 bg-green-100 rounded-full flex-shrink-0">
-            <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+            <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-800" />
           </div>
         </div>
       </button>
@@ -72,7 +72,7 @@ export default function ReportStats({ stats, activeCard, onCardClick, hideDraft 
             <p className="text-gray-500 text-xs mt-1">{stats.ditolak} laporan</p>
           </div>
           <div className="p-2 sm:p-3 bg-red-100 rounded-full flex-shrink-0">
-            <XCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
+            <XCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-800" />
           </div>
         </div>
       </button>
