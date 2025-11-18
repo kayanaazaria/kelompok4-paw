@@ -142,7 +142,7 @@ export default function DetailLaporanKepalaBidang() {
         {/* Main Content */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <LaporanInfo laporan={laporan} />
-            <DetailKejadian laporan={laporan} />
+            <DetailKejadian detailKejadian={laporan.detailKejadian} />
             <LampiranSection attachmentUrl={laporan.attachmentUrl} />
             <ApprovalInfo laporan={laporan} />
         </div>
