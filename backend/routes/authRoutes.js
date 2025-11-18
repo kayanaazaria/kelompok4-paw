@@ -7,7 +7,9 @@ const {
   loginUser, 
   logoutUser, 
   logoutGoogleUser, 
-  universalLogout 
+  universalLogout,
+  forgotPassword,
+  resetPassword
 } = require('../controllers/authController');
 const { authMiddleware, roleCheck } = require('../middleware/auth');
 
@@ -16,6 +18,12 @@ router.post('/register', authMiddleware, roleCheck('admin'), registerUser);
 
 // Endpoint untuk login
 router.post('/login', loginUser);
+
+// Endpoint untuk forgot password
+router.post('/forgot-password', forgotPassword);
+
+// Endpoint untuk reset password
+router.post('/reset-password/:token', resetPassword);
 
 // ================== LOGOUT ENDPOINTS ==================
 

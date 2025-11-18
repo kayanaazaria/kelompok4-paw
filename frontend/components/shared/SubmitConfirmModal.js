@@ -5,6 +5,7 @@ const SubmitConfirmModal = ({
   show,
   onClose,
   onConfirm,
+  loading = false,
   reportName,
   title = 'Submit untuk Persetujuan',
   message = 'Apakah Anda yakin ingin submit laporan ini untuk persetujuan?',
@@ -60,18 +61,17 @@ const SubmitConfirmModal = ({
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              disabled={loading}
+              className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium disabled:opacity-50"
             >
               {cancelLabel}
             </button>
             <button
-              onClick={() => {
-                onConfirm();
-                onClose();
-              }}
-              className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+              onClick={() => onConfirm && onConfirm()}
+              disabled={loading}
+              className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium disabled:opacity-50"
             >
-              {confirmLabel}
+              {loading ? 'Memproses...' : confirmLabel}
             </button>
           </div>
         </div>

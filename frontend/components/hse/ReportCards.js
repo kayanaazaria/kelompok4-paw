@@ -32,7 +32,7 @@ const getSkalaBadgeColor = (skala) => {
   }
 };
 
-const ReportCards = ({ reports, onEdit, onDelete, onView, onSubmit }) => {
+const ReportCards = ({ reports, onEdit, onDelete, onView, onSubmit, submittingReportId }) => {
   return (
     <div className="lg:hidden space-y-4 p-4">
       {reports.map((report) => (
@@ -95,10 +95,11 @@ const ReportCards = ({ reports, onEdit, onDelete, onView, onSubmit }) => {
                 </button>
                 <button
                   onClick={() => onSubmit(report)}
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition text-sm font-medium"
+                  disabled={submittingReportId === report._id}
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition text-sm font-medium disabled:opacity-60"
                 >
                   <Send size={16} />
-                  <span>Submit</span>
+                  <span>{submittingReportId === report._id ? 'Memproses...' : 'Submit'}</span>
                 </button>
                 <button
                   onClick={() => onDelete(report)}

@@ -22,6 +22,7 @@ const useReportManagement = () => {
     status: ""
   });
   const [formErrors, setFormErrors] = useState({});
+  const [submittingReportId, setSubmittingReportId] = useState(null);
 
   const fetchReports = async () => {
     try {
@@ -152,11 +153,14 @@ const useReportManagement = () => {
     if (!window.confirm(`Submit laporan "${report.namaPekerja}" untuk persetujuan?`)) return;
 
     try {
+      setSubmittingReportId(report._id);
       await api.put(`/api/laporan/${report._id}/submit`);
       await fetchReports();
     } catch (err) {
       setError(err.response?.data?.message || "Gagal submit laporan");
       console.error("Error submitting report:", err);
+    } finally {
+      setSubmittingReportId(null);
     }
   };
 
@@ -201,6 +205,7 @@ const useReportManagement = () => {
     handleInputChange,
     handleSubmit,
     handleSubmitReport,
+    submittingReportId,
     openDeleteModal,
     closeDeleteModal,
     handleDeleteReport,

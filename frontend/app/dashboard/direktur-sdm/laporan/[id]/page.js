@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import api from "@/services/api";
-import { Navbar, ErrorAlert } from "@/components/shared";
+import { Navbar, ErrorAlert, SuccessAlert } from "@/components/shared";
 import { 
   LaporanHeader, 
   LaporanInfo, 
@@ -22,6 +22,7 @@ export default function DetailLaporanDirektur() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -55,8 +56,8 @@ export default function DetailLaporanDirektur() {
       setActionLoading(true);
       setError(null);
       await api.put(`/api/laporan/${params.id}/approve-direktur`);
-      alert("Laporan berhasil disetujui");
-      router.push("/dashboard/direktur-sdm");
+      setSuccessMessage("Laporan berhasil disetujui");
+      setTimeout(() => router.push("/dashboard/direktur-sdm"), 1200);
     } catch (err) {
       setError(err.response?.data?.message || "Gagal menyetujui laporan");
     } finally {
@@ -78,9 +79,9 @@ export default function DetailLaporanDirektur() {
         `/api/laporan/${params.id}/reject-direktur`,
         { alasanPenolakan: finalReason }
       );
-      alert("Laporan berhasil ditolak");
+      setSuccessMessage("Laporan berhasil ditolak");
       setShowRejectModal(false);
-      router.push("/dashboard/direktur-sdm");
+      setTimeout(() => router.push("/dashboard/direktur-sdm"), 1200);
     } catch (err) {
       setError(err.response?.data?.message || "Gagal menolak laporan");
     } finally {
@@ -136,6 +137,7 @@ export default function DetailLaporanDirektur() {
         </button>
 
         {error && <ErrorAlert message={error} />}
+        {successMessage && <SuccessAlert message={successMessage} />}
 
         {/* Header Component */}
         <LaporanHeader laporan={laporan} />
@@ -179,6 +181,7 @@ export default function DetailLaporanDirektur() {
         show={showSubmitModal}
         onClose={() => setShowSubmitModal(false)}
         onConfirm={confirmApprove}
+        loading={actionLoading}
         reportName={laporan?.title || laporan?.judul}
         title={"Setujui Laporan"}
         message={"Apakah Anda yakin ingin menyetujui laporan ini?"}
@@ -190,6 +193,7 @@ export default function DetailLaporanDirektur() {
         show={showRejectModal}
         onClose={() => setShowRejectModal(false)}
         onConfirm={(reason) => handleReject(reason)}
+        loading={actionLoading}
       />
     </div>
   );

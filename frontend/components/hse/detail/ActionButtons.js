@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Edit2, Eye, Download, Trash2, X, Calendar, User, Briefcase, FileText, AlertTriangle } from "lucide-react";
 import api from "@/services/api";
+import ErrorAlert from "@/components/shared/ErrorAlert";
 import { ApprovalTimelineCompact } from "../../shared/ApprovalTimeline";
 
 const ActionButtons = ({ laporan, onEdit, onSubmit, onDelete }) => {
@@ -9,6 +10,8 @@ const ActionButtons = ({ laporan, onEdit, onSubmit, onDelete }) => {
   const handleViewDocument = () => {
     setShowModal(true);
   };
+
+  const [downloadError, setDownloadError] = useState(null);
 
   const handleDownloadDocument = async () => {
     try {
@@ -39,10 +42,13 @@ const ActionButtons = ({ laporan, onEdit, onSubmit, onDelete }) => {
       }, 100);
 
       console.log('Download completed successfully');
+      setDownloadError(null);
     } catch (err) {
       console.error('Download error:', err);
-      const errorMessage = err.response?.data?.message || err.message || "Gagal mendownload dokumen";
-      alert(errorMessage);
+      const errorMessage = err.response?.data?.message || err.message || "Gagal mengunduh lampiran. File mungkin tidak ditemukan atau sudah dihapus.";
+      setDownloadError(errorMessage);
+      // clear after some time
+      setTimeout(() => setDownloadError(null), 6000);
     }
   };
 
@@ -105,6 +111,11 @@ const ActionButtons = ({ laporan, onEdit, onSubmit, onDelete }) => {
   if (laporan.status === "Disetujui") {
     return (
       <>
+        {downloadError && (
+          <div className="mb-4">
+            <ErrorAlert message={downloadError} />
+          </div>
+        )}
         <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:gap-4 relative z-10">
           <button
             onClick={handleViewDocument}
