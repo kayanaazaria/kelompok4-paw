@@ -87,8 +87,10 @@ export default function DetailLaporanKepalaBidang() {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
-        <div className="flex items-center justify-center h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+          </div>
         </div>
       </div>
     );
@@ -101,11 +103,11 @@ export default function DetailLaporanKepalaBidang() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <ErrorAlert message={error || "Laporan tidak ditemukan"} />
           <button
-            onClick={() => router.push("/dashboard/kepala-bidang")}
+            onClick={() => router.push("/dashboard/direktur-sdm")}
             className="mt-4 flex items-center gap-2 text-emerald-600 hover:text-emerald-700"
           >
             <ArrowLeft size={20} />
-            Kembali
+            Kembali ke Dashboard
           </button>
         </div>
       </div>
@@ -119,9 +121,10 @@ export default function DetailLaporanKepalaBidang() {
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {/* Back Button */}
         <button
           onClick={() => router.push("/dashboard/kepala-bidang")}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+          className="mb-4 sm:mb-6 text-gray-600 hover:text-gray-900 flex items-center gap-2 transition-colors text-sm sm:text-base"
         >
           <ArrowLeft size={20} />
           <span className="font-medium">Kembali ke Dashboard</span>
@@ -129,18 +132,18 @@ export default function DetailLaporanKepalaBidang() {
 
         {error && <ErrorAlert message={error} />}
 
+        {/* Header Component */}
         <LaporanHeader laporan={laporan} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-          <div className="lg:col-span-2 space-y-6">
+        {/* Main Content */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <LaporanInfo laporan={laporan} />
             <DetailKejadian laporan={laporan} />
-            {laporan.attachment && <LampiranSection laporan={laporan} />}
-          </div>
+            <LampiranSection attachmentUrl={laporan.attachmentUrl} />
+            <ApprovalInfo laporan={laporan} />
+        </div>
 
           <div className="space-y-6">
-            <ApprovalInfo laporan={laporan} />
-            
             {canTakeAction && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">Aksi Persetujuan</h3>
@@ -193,7 +196,6 @@ export default function DetailLaporanKepalaBidang() {
               </div>
             )}
           </div>
-        </div>
       </div>
 
       {/* Reject Modal */}

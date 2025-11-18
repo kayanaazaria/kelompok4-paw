@@ -193,7 +193,6 @@ export default function DetailLaporanDirektur() {
               </div>
             )}
           </div>
-
       </div>
 
       {/* Reject Modal */}
