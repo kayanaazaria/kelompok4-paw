@@ -39,7 +39,8 @@ app.use(cors({
     'http://localhost:3001', 
     'http://localhost:5001',
     'https://kelompok4-paw.netlify.app',
-    'https://*.netlify.app'
+    'https://paw-eta.vercel.app', // <--- TAMBAHKAN INI (Link Frontend Kamu)
+    process.env.FRONTEND_URL // <--- TAMBAHKAN INI (Biar otomatis baca dari .env Vercel)
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
