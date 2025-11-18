@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-poppins), sans-serif;
+}
+
+.card-shadow {
+  box-shadow: 0 10px 30px rgba(16, 24, 40, 0.06);
+  border-radius: 0.75rem;
+}
+
+.table-card thead {
+  background: #f8fafc;
+}
+
+.search-input {
+  background: #f3f4f6;
+  border-radius: 9999px;
+  padding: 0.6rem 1rem;
+  border: 1px solid rgba(15, 23, 42, 0.04);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+@keyframes scale-pop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-pop {
+  animation: scale-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (min-width: 1280px) {
+  .max-w-7xl {
+    max-width: 1200px;
+  }
+}
