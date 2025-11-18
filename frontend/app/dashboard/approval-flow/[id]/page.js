@@ -317,7 +317,7 @@ export default function ApprovalFlowPage({ params }) {
                                 <div>
                                     <div className="flex items-center gap-2 mb-3">
                                         <span className="text-gray-600">⚠️</span>
-                                        <span className="text-gray-600">Skala Insiden</span>
+                                        <span className="text-gray-600">Skala Cedera</span>
                                     </div>
                                     <span className="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded font-semibold text-sm">{documentData.skalaCedera}</span>
                                 </div>

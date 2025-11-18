@@ -51,7 +51,8 @@ app.use(cors({
 }));
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
-  crossOriginOpenerPolicy: { policy: "unsafe-none" }
+  crossOriginOpenerPolicy: { policy: "unsafe-none" },
+  frameguard: false // Disable X-Frame-Options untuk allow iframe
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
