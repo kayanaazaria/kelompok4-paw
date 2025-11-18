@@ -49,7 +49,7 @@ router.get('/google',
   },
   passport.authenticate('google', { 
     scope: ['profile', 'email'],
-    session: true
+    session: false // Disable session for serverless
   })
 );
 

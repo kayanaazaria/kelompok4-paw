@@ -6,20 +6,7 @@ const User = require('../models/userModel');
 console.log('Initializing Passport with Google Strategy');
 console.log('Callback URL:', process.env.GOOGLE_CALLBACK_URL);
 
-passport.serializeUser((user, done) => {
-  console.log('Serializing user:', user.id);
-  done(null, user.id);
-});
-
-passport.deserializeUser(async (id, done) => {
-  console.log('Deserializing user:', id);
-  try {
-    const user = await User.findById(id);
-    done(null, user);
-  } catch (error) {
-    done(error, null);
-  }
-});
+// REMOVED: serializeUser and deserializeUser - not needed for JWT-only serverless
 
 passport.use(new GoogleStrategy(
   {

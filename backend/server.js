@@ -3,7 +3,6 @@ const helmet = require('helmet');
 const { connectDB } = require('./config/dbConnection');
 const dotenv = require('dotenv').config();
 const cors = require('cors');
-const session = require('express-session');
 const passport = require('passport');
 require('./config/passport');  
 const errorHandler = require('./middleware/errorHandler');
@@ -18,40 +17,33 @@ connectDB().catch(err => {
   // Jangan exit di serverless environment
 });
 
-// Session configuration
-if (!process.env.SESSION_SECRET) {
-  console.error('ERROR: SESSION_SECRET is required in environment variables');
-  // Jangan exit di serverless, biarkan error handler yang menangani
+// Initialize Passport (tanpa session untuk serverless)
+app.use(passport.initialize());
+
+// Debug middleware (hanya untuk development)
+if (process.env.NODE_ENV !== 'production') {
+  app.use((req, res, next) => {
+    console.log('Request URL:', req.url);
+    console.log('Auth Header:', req.headers.authorization);
+    console.log('User:', req.user);
+    next();
+  });
 }
 
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production', 
-    maxAge: 24 * 60 * 60 * 1000 
-  }
-}));
-
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Debug middleware
-app.use((req, res, next) => {
-  console.log('Request URL:', req.url);
-  console.log('Auth Header:', req.headers.authorization);
-  console.log('Session:', req.session);
-  console.log('User:', req.user);
-  next();
-});
-
-app.get('/', (_,res) => res.send('OK - finaldoc branch'));
+app.get('/', (_,res) => res.send('OK - Backend running on Vercel'));
 
 // Security & Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5001'],
-  credentials: true
+  origin: [
+    'http://localhost:3000', 
+    'http://localhost:3001', 
+    'http://localhost:5001',
+    'https://kelompok4-paw.netlify.app',
+    'https://*.netlify.app'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
@@ -80,7 +72,7 @@ const requiredEnvVars = [
   'EMAIL_PASS',
   'GOOGLE_CLIENT_ID',
   'GOOGLE_CLIENT_SECRET',
-  'SESSION_SECRET'
+  'FRONTEND_URL'
 ];
 
 requiredEnvVars.forEach(varName => {
