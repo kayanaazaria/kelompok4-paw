@@ -1,0 +1,13 @@
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NEXT_PUBLIC_BACKEND_URL = "https://kelompok4-paw.vercel.app"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
