@@ -85,18 +85,10 @@ router.get('/google/callback', (req, res, next) => {
     };
     res.cookie('auth_token', token, cookieOptions);
 
-    // Redirect user directly to role-specific dashboard
-    // Pass token as query param for frontend verification (token also in httpOnly cookie)
+    // Redirect to frontend callback page to process token
+    // The callback page will store token and redirect to appropriate dashboard
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const role = user.role || 'user';
-    const roleRedirects = {
-      admin: '/dashboard/admin',
-      hse: '/dashboard/hse',
-      kepala_bidang: '/dashboard/kepala-bidang',
-      direktur_sdm: '/dashboard/direktur-sdm'
-    };
-    const redirectPath = roleRedirects[role] || '/';
-    return res.redirect(`${frontendUrl}${redirectPath}?token=${encodeURIComponent(token)}`);
+    return res.redirect(`${frontendUrl}/auth/google/callback?token=${encodeURIComponent(token)}`);
   })(req, res, next);
 });
 
