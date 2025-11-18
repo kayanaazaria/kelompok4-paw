@@ -9,16 +9,19 @@ require('./config/passport');
 const errorHandler = require('./middleware/errorHandler');
 const cookieParser = require('cookie-parser');
 
-// Koneksi database
-connectDB();
-
 const app = express();
 const port = process.env.PORT || 5001;
+
+// Koneksi database (async untuk Vercel)
+connectDB().catch(err => {
+  console.error('Database connection failed:', err.message);
+  // Jangan exit di serverless environment
+});
 
 // Session configuration
 if (!process.env.SESSION_SECRET) {
   console.error('ERROR: SESSION_SECRET is required in environment variables');
-  process.exit(1);
+  // Jangan exit di serverless, biarkan error handler yang menangani
 }
 
 app.use(session({
@@ -69,7 +72,7 @@ app.use('/', routes);
 // ================== ERROR HANDLER ==================
 app.use(errorHandler);
 
-// Cek variabel lingkungan yang diperlukan
+// Cek variabel lingkungan yang diperlukan (warning only di serverless)
 const requiredEnvVars = [
   'MONGO_URI',
   'JWT_SECRET',
@@ -82,12 +85,16 @@ const requiredEnvVars = [
 
 requiredEnvVars.forEach(varName => {
   if (!process.env[varName]) {
-    console.error(`Missing required environment variable: ${varName}`);
-    process.exit(1);
+    console.warn(`Missing required environment variable: ${varName}`);
   }
 });
 
-// Start server
-app.listen(port, '0.0.0.0', () => {
-  console.log(`Server is running on port: ${port}`);
-});
+// Start server (hanya untuk local development)
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(port, '0.0.0.0', () => {
+    console.log(`Server is running on port: ${port}`);
+  });
+}
+
+// Export untuk Vercel serverless
+module.exports = app;
