@@ -12,8 +12,6 @@ export default function GoogleCallbackPage() {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        // Ambil token dari URL query parameter jika ada
-        const token = searchParams.get('token');
         const errorParam = searchParams.get('error');
 
         if (errorParam) {
@@ -22,26 +20,37 @@ export default function GoogleCallbackPage() {
           return;
         }
 
+        // Get token from URL query parameter (passed by backend after setting httpOnly cookie)
+        const token = searchParams.get('token');
+
         if (!token) {
-          // Jika tidak ada token di query, berarti masih di proses OAuth
-          // Backend akan redirect ke callback dengan token
+          // If no token in query, redirect to login
+          setError('Token tidak ditemukan');
+          setTimeout(() => router.push('/login'), 2000);
           return;
         }
 
-        // Decode token untuk mendapatkan user info
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        
-        // Store auth session
-        storeAuthSession({
-          token,
-          role: payload.role,
-          username: payload.username,
-          email: payload.email || payload.username
-        });
+        try {
+          // Decode token to get user info
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          
+          // Store auth session in localStorage for frontend use
+          storeAuthSession({
+            token,
+            role: payload.role,
+            username: payload.username,
+            email: payload.email || payload.username
+          });
 
-        // Redirect berdasarkan role
-        const redirectPath = getRoleRoute(payload.role);
-        router.push(redirectPath);
+          // Redirect ke dashboard sesuai role
+          // httpOnly cookie sudah di-set oleh backend
+          const redirectPath = getRoleRoute(payload.role);
+          router.push(redirectPath);
+        } catch (decodeErr) {
+          console.error('Token decode error:', decodeErr);
+          setError('Token tidak valid');
+          setTimeout(() => router.push('/login'), 2000);
+        }
       } catch (err) {
         console.error('Google callback error:', err);
         setError('Gagal memproses login Google');

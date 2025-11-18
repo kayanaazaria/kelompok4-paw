@@ -85,7 +85,8 @@ router.get('/google/callback', (req, res, next) => {
     };
     res.cookie('auth_token', token, cookieOptions);
 
-    // Redirect user directly to role-specific dashboard to avoid client-side token plumbing
+    // Redirect user directly to role-specific dashboard
+    // Pass token as query param for frontend verification (token also in httpOnly cookie)
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const role = user.role || 'user';
     const roleRedirects = {
@@ -95,7 +96,7 @@ router.get('/google/callback', (req, res, next) => {
       direktur_sdm: '/dashboard/direktur-sdm'
     };
     const redirectPath = roleRedirects[role] || '/';
-    return res.redirect(`${frontendUrl}${redirectPath}`);
+    return res.redirect(`${frontendUrl}${redirectPath}?token=${encodeURIComponent(token)}`);
   })(req, res, next);
 });
 
