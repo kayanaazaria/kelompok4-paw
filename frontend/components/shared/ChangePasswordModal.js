@@ -13,11 +13,13 @@ export default function ChangePasswordModal({ isOpen, onClose, onSubmit }) {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
     // Validasi
     if (formData.newPassword.length < 8) {
@@ -45,6 +47,12 @@ export default function ChangePasswordModal({ isOpen, onClose, onSubmit }) {
         confirmPassword: ''
       });
       setError('');
+      setSuccess('Password berhasil diubah!');
+      
+      // Auto close after 2 seconds
+      setTimeout(() => {
+        handleClose();
+      }, 2000);
     } catch (err) {
       setError(err.message || 'Gagal mengubah password');
     } finally {
@@ -59,6 +67,7 @@ export default function ChangePasswordModal({ isOpen, onClose, onSubmit }) {
       confirmPassword: ''
     });
     setError('');
+    setSuccess('');
     setShowCurrentPassword(false);
     setShowNewPassword(false);
     setShowConfirmPassword(false);
@@ -94,6 +103,12 @@ export default function ChangePasswordModal({ isOpen, onClose, onSubmit }) {
             {error && (
               <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
                 {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="text-sm text-green-600 bg-green-50 border border-green-200 rounded-lg p-3">
+                {success}
               </div>
             )}
 
