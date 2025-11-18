@@ -12,6 +12,7 @@ import {
   ApprovalInfo 
 } from "@/components/hse/detail";
 import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
+import SubmitConfirmModal from "@/components/shared/SubmitConfirmModal";
 
 export default function DetailLaporanKepalaBidang() {
   const router = useRouter();
@@ -22,6 +23,7 @@ export default function DetailLaporanKepalaBidang() {
   const [actionLoading, setActionLoading] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
 
   useEffect(() => {
     const fetchLaporan = async () => {
@@ -43,10 +45,11 @@ export default function DetailLaporanKepalaBidang() {
   }, [params.id]);
 
   const handleApprove = async () => {
-    if (!window.confirm("Apakah Anda yakin ingin menyetujui laporan ini?")) {
-      return;
-    }
+    // show modal instead of native confirm
+    setShowSubmitModal(true);
+  };
 
+  const confirmApprove = async () => {
     try {
       setActionLoading(true);
       setError(null);
@@ -199,14 +202,26 @@ export default function DetailLaporanKepalaBidang() {
       </div>
 
       {/* Reject Modal */}
+      {/* Submit Confirm Modal (reuse shared component) */}
+      <SubmitConfirmModal
+        show={showSubmitModal}
+        onClose={() => setShowSubmitModal(false)}
+        onConfirm={confirmApprove}
+        reportName={laporan?.title || laporan?.judul}
+        title={"Setujui Laporan"}
+        message={"Apakah Anda yakin ingin menyetujui laporan ini dan meneruskan ke Direktur SDM?"}
+        note={"Setelah disetujui, laporan tidak dapat diedit kembali."}
+        confirmLabel={"Ya, Setujui"}
+      />
       {showRejectModal && (
         <>
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
-            onClick={() => setShowRejectModal(false)}
-          ></div>
           <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            {/* Backdrop: blur instead of solid black */}
+            <div
+              className="absolute inset-0 bg-opacity-50 backdrop-blur-sm transition-opacity"
+              onClick={() => setShowRejectModal(false)}
+            ></div>
+            <div className="relative bg-white rounded-xl shadow-xl max-w-md w-full p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-4">Tolak Laporan</h3>
               <p className="text-gray-600 mb-4">
                 Silakan berikan alasan penolakan laporan ini:

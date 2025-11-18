@@ -1,7 +1,17 @@
 import React from "react";
 import { AlertCircle, X } from "lucide-react";
 
-const SubmitConfirmModal = ({ show, onClose, onConfirm, reportName }) => {
+const SubmitConfirmModal = ({
+  show,
+  onClose,
+  onConfirm,
+  reportName,
+  title = 'Submit untuk Persetujuan',
+  message = 'Apakah Anda yakin ingin submit laporan ini untuk persetujuan?',
+  note = 'Setelah di-submit, laporan tidak dapat diedit kembali.',
+  confirmLabel = 'Ya, Submit',
+  cancelLabel = 'Batal',
+}) => {
   if (!show) return null;
 
   return (
@@ -30,19 +40,19 @@ const SubmitConfirmModal = ({ show, onClose, onConfirm, reportName }) => {
 
           {/* Title */}
           <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">
-            Submit untuk Persetujuan
+            {title}
           </h3>
 
           {/* Message */}
           <p className="text-sm text-gray-600 text-center mb-6">
-            Apakah Anda yakin ingin submit laporan ini untuk persetujuan? 
+            {message}
             {reportName && (
               <span className="block mt-2 font-medium text-gray-900">
                 "{reportName}"
               </span>
             )}
             <span className="block mt-2 text-xs text-gray-500">
-              Setelah di-submit, laporan tidak dapat diedit kembali.
+              {note}
             </span>
           </p>
 
@@ -52,7 +62,7 @@ const SubmitConfirmModal = ({ show, onClose, onConfirm, reportName }) => {
               onClick={onClose}
               className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
             >
-              Batal
+              {cancelLabel}
             </button>
             <button
               onClick={() => {
@@ -61,7 +71,7 @@ const SubmitConfirmModal = ({ show, onClose, onConfirm, reportName }) => {
               }}
               className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
             >
-              Ya, Submit
+              {confirmLabel}
             </button>
           </div>
         </div>
