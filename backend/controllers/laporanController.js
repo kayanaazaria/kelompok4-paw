@@ -142,15 +142,20 @@ const submitLaporan = async (req, res) => {
       await sendEmail(
         recipients.join(","),
         "Laporan Kecelakaan Baru – Butuh Persetujuan",
-        `Halo,\n\nAda laporan kecelakaan baru dari ${req.user.username}.
-        
-Nama Pegawai : ${laporan.namaPekerja}
-Tanggal      : ${laporan.tanggalKejadian?.toDateString()}
-Departemen   : ${laporan.department}
-Skala Cedera : ${laporan.skalaCedera}
-
-Silakan login ke sistem untuk approve/tolak.`
+        `Halo,\n\nAda laporan kecelakaan baru dari ${req.user.username}.\n\nNama Pegawai : ${laporan.namaPekerja}\nTanggal      : ${laporan.tanggalKejadian?.toDateString()}\nDepartemen   : ${laporan.department}\nSkala Cedera : ${laporan.skalaCedera}\n\nSilakan login ke sistem untuk approve/tolak.`
       );
+
+      // Create Notification entries and broadcast via SSE
+      const Notification = require('../models/notificationModel');
+      const { broadcast } = require('../services/notificationStream');
+      for (const kabid of kabids) {
+        try {
+          const n = await Notification.create({ recipient: kabid._id, message: `Laporan baru: ${laporan.namaPekerja}`, laporanId: laporan._id });
+          broadcast({ recipient: kabid._id, message: n.message, laporanId: n.laporanId, createdAt: n.createdAt });
+        } catch (e) {
+          console.error('Notification create error:', e.message);
+        }
+      }
     }
 
     res.json({ message: "Laporan berhasil diajukan", laporan });
@@ -163,12 +168,46 @@ Silakan login ke sistem untuk approve/tolak.`
 // Ambil semua laporan
 const getAllLaporan = async (req, res) => {
   try {
-    const laporan = await Laporan.find()
+    // If client did not provide pagination params, keep legacy behaviour (return array)
+    const hasPage = typeof req.query.page !== 'undefined';
+    const hasLimit = typeof req.query.limit !== 'undefined';
+
+    const status = req.query.status;
+    const department = req.query.department;
+    const filter = {};
+    if (status) filter.status = status;
+    if (department) filter.department = department;
+
+    if (!hasPage && !hasLimit) {
+      // Legacy: return array of laporan
+      const laporan = await Laporan.find(filter)
+        .sort({ createdAt: -1 })
+        .populate("createdByHSE", "username email role")
+        .populate("signedByKabid", "username email role")
+        .populate("approvedByDirektur", "username email role");
+
+      return res.json(laporan);
+    }
+
+    // Server-side pagination & filtering when page/limit provided
+    const page = parseInt(req.query.page || '1', 10);
+    const limit = parseInt(req.query.limit || '20', 10);
+    const total = await Laporan.countDocuments(filter);
+    const laporan = await Laporan.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
       .populate("createdByHSE", "username email role")
       .populate("signedByKabid", "username email role")
       .populate("approvedByDirektur", "username email role");
 
-    res.json(laporan);
+    res.json({
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      data: laporan
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Gagal mengambil laporan" });
@@ -252,6 +291,22 @@ const approveByKepalaBidang = async (req, res) => {
       `Halo,\n\nLaporan kecelakaan dari ${laporan.namaPekerja} sudah disetujui Kepala Bidang.\n\nMenunggu persetujuan Direktur SDM.`
     );
 
+    // create notification for direktur and hse + broadcast
+    const Notification = require('../models/notificationModel');
+    const { broadcast } = require('../services/notificationStream');
+    try {
+      // HSE
+      const nHse = await Notification.create({ recipient: laporan.createdByHSE, message: `Laporan Anda disetujui oleh Kepala Bidang`, laporanId: laporan._id });
+      broadcast({ recipient: laporan.createdByHSE, message: nHse.message, laporanId: nHse.laporanId, createdAt: nHse.createdAt });
+      // Direktur
+      for (const d of direkturs) {
+        const nDir = await Notification.create({ recipient: d._id, message: `Laporan menunggu persetujuan Direktur SDM: ${laporan.namaPekerja}`, laporanId: laporan._id });
+        broadcast({ recipient: d._id, message: nDir.message, laporanId: nDir.laporanId, createdAt: nDir.createdAt });
+      }
+    } catch (e) {
+      console.error('Notif create error:', e.message);
+    }
+
     res.json({ message: "Laporan disetujui Kepala Bidang", laporan });
   } catch (error) {
     console.error(error);
@@ -301,6 +356,16 @@ const approveByDirektur = async (req, res) => {
       .populate("signedByKabid", "username email role")
       .populate("approvedByDirektur", "username email role");
 
+    // create notification for HSE
+    const Notification = require('../models/notificationModel');
+    const { broadcast } = require('../services/notificationStream');
+    try {
+      const n = await Notification.create({ recipient: laporan.createdByHSE._id, message: `Laporan Anda telah disetujui oleh Direktur SDM`, laporanId: laporan._id });
+      broadcast({ recipient: laporan.createdByHSE._id, message: n.message, laporanId: n.laporanId, createdAt: n.createdAt });
+    } catch (e) {
+      console.error('Notif create error:', e.message);
+    }
+
     res.json({ message: "Laporan disetujui Direktur SDM", laporan: populated });
   } catch (error) {
     console.error(error);
@@ -329,6 +394,16 @@ const rejectByDirektur = async (req, res) => {
       .populate("createdByHSE", "username email role")
       .populate("signedByKabid", "username email role")
       .populate("approvedByDirektur", "username email role");
+
+    // create notification for HSE about rejection
+    const Notification = require('../models/notificationModel');
+    const { broadcast } = require('../services/notificationStream');
+    try {
+      const n = await Notification.create({ recipient: laporan.createdByHSE._id, message: `Laporan Anda ditolak oleh Direktur SDM`, laporanId: laporan._id });
+      broadcast({ recipient: laporan.createdByHSE._id, message: n.message, laporanId: n.laporanId, createdAt: n.createdAt });
+    } catch (e) {
+      console.error('Notif create error:', e.message);
+    }
 
     res.json({ message: "Laporan ditolak Direktur SDM", laporan: populated });
   } catch (error) {

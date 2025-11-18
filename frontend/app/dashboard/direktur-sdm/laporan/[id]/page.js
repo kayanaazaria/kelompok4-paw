@@ -13,6 +13,7 @@ import {
 } from "@/components/hse/detail";
 import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
 import SubmitConfirmModal from "@/components/shared/SubmitConfirmModal";
+import RejectModal from "@/components/shared/RejectModal";
 
 export default function DetailLaporanDirektur() {
   const router = useRouter();
@@ -63,8 +64,9 @@ export default function DetailLaporanDirektur() {
     }
   };
 
-  const handleReject = async () => {
-    if (!rejectionReason.trim()) {
+  const handleReject = async (reason) => {
+    const finalReason = typeof reason === 'string' ? reason : rejectionReason;
+    if (!finalReason || !finalReason.trim()) {
       alert("Alasan penolakan harus diisi");
       return;
     }
@@ -74,7 +76,7 @@ export default function DetailLaporanDirektur() {
       setError(null);
       await api.put(
         `/api/laporan/${params.id}/reject-direktur`,
-        { alasanPenolakan: rejectionReason }
+        { alasanPenolakan: finalReason }
       );
       alert("Laporan berhasil ditolak");
       setShowRejectModal(false);
@@ -196,7 +198,6 @@ export default function DetailLaporanDirektur() {
           </div>
       </div>
 
-      {/* Submit Confirm Modal (reuse shared component) */}
       <SubmitConfirmModal
         show={showSubmitModal}
         onClose={() => setShowSubmitModal(false)}
@@ -208,48 +209,11 @@ export default function DetailLaporanDirektur() {
         confirmLabel={"Ya, Setujui"}
       />
 
-      {/* Reject Modal */}
-      {showRejectModal && (
-        <>
-          <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-            {/* Backdrop: blur instead of solid black */}
-            <div
-              className="absolute inset-0 bg-opacity-50 backdrop-blur-sm transition-opacity"
-              onClick={() => setShowRejectModal(false)}
-            ></div>
-            <div className="relative bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Tolak Laporan</h3>
-              <p className="text-gray-600 mb-4">
-                Silakan berikan alasan penolakan laporan ini:
-              </p>
-              <textarea
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="Masukkan alasan penolakan..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 min-h-[120px]"
-              />
-              <div className="flex gap-3 mt-6">
-                <button
-                  onClick={() => {
-                    setShowRejectModal(false);
-                    setRejectionReason("");
-                  }}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Batal
-                </button>
-                <button
-                  onClick={handleReject}
-                  disabled={actionLoading || !rejectionReason.trim()}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {actionLoading ? "Memproses..." : "Tolak"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+      <RejectModal
+        show={showRejectModal}
+        onClose={() => setShowRejectModal(false)}
+        onConfirm={(reason) => handleReject(reason)}
+      />
     </div>
   );
 }

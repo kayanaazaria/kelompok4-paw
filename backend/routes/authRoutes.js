@@ -76,9 +76,26 @@ router.get('/google/callback', (req, res, next) => {
       { expiresIn: '1d' }
     );
 
-    // Redirect ke frontend callback dengan token
+    // Set httpOnly cookie so frontend doesn't need to store token in localStorage
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000 // 1 day
+    };
+    res.cookie('auth_token', token, cookieOptions);
+
+    // Redirect user directly to role-specific dashboard to avoid client-side token plumbing
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    res.redirect(`${frontendUrl}/auth/google/callback?token=${token}`);
+    const role = user.role || 'user';
+    const roleRedirects = {
+      admin: '/dashboard/admin',
+      hse: '/dashboard/hse',
+      kepala_bidang: '/dashboard/kepala-bidang',
+      direktur_sdm: '/dashboard/direktur-sdm'
+    };
+    const redirectPath = roleRedirects[role] || '/';
+    return res.redirect(`${frontendUrl}${redirectPath}`);
   })(req, res, next);
 });
 

@@ -47,13 +47,23 @@ const loginUser = async (req, res, next) => {
   try {
     const user = await User.findOne({ email });
     if (user && (await user.matchPassword(password))) {
-      res.json({
+      const token = generateToken(user._id, user.role, user.username, user.email, user.department);
+
+      // Set cookie for server-side session (httpOnly)
+      res.cookie('auth_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      });
+
+      return res.json({
         _id: user.id,
         username: user.username,
         email: user.email,
         role: user.role,
         department: user.department,
-        token: generateToken(user._id, user.role, user.username, user.email, user.department)
+        token // keep returning token for backward compatibility
       });
     } else {
       res.status(401);
@@ -74,6 +84,9 @@ const logoutUser = async (req, res) => {
       // Blacklist token di server
       await blacklistToken(token, userId, 'logout');
     }
+
+    // Clear httpOnly cookie
+    res.clearCookie('auth_token');
 
     res.json({ 
       message: "Logout berhasil",
@@ -133,7 +146,9 @@ const logoutGoogleUser = async (req, res) => {
           console.error('Session destroy error:', err);
           return res.status(500).json({ message: 'Gagal menghapus session' });
         }
+        // Clear auth cookie if set
         res.clearCookie('connect.sid');
+        res.clearCookie('auth_token');
         res.json({
           message: 'Google OAuth logout berhasil',
           type: 'google_oauth',

@@ -13,6 +13,7 @@ const LaporanSchema = new mongoose.Schema({
     enum: DEPARTMENTS,
     required: true 
   },
+  nomorLaporan: { type: String, unique: true, index: true },
   status: {
     type: String,
     enum: [
