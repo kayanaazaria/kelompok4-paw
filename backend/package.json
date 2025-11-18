@@ -19,7 +19,9 @@
   },
   "homepage": "https://github.com/kayanaazaria/kelompok4-paw#readme",
   "dependencies": {
+    "@supabase/supabase-js": "^2.81.1",
     "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
@@ -36,6 +38,6 @@
     "qrcode": "^1.5.4"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.11"
   }
 }

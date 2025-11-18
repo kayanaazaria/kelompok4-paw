@@ -7,7 +7,9 @@ const {
   loginUser, 
   logoutUser, 
   logoutGoogleUser, 
-  universalLogout 
+  universalLogout,
+  forgotPassword,
+  resetPassword
 } = require('../controllers/authController');
 const { authMiddleware, roleCheck } = require('../middleware/auth');
 
@@ -16,6 +18,12 @@ router.post('/register', authMiddleware, roleCheck('admin'), registerUser);
 
 // Endpoint untuk login
 router.post('/login', loginUser);
+
+// Endpoint untuk forgot password
+router.post('/forgot-password', forgotPassword);
+
+// Endpoint untuk reset password
+router.post('/reset-password/:token', resetPassword);
 
 // ================== LOGOUT ENDPOINTS ==================
 
@@ -54,30 +62,41 @@ router.get('/google/callback', (req, res, next) => {
   }, (err, user, info) => {
     if (err) {
       console.error('Google Auth Error:', err);
-      return res.status(500).json({ error: err.message });
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      return res.redirect(`${frontendUrl}/auth/google/callback?error=${encodeURIComponent(err.message)}`);
     }
     
     if (!user) {
-      return res.status(401).json({ error: 'Authentication failed' });
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      return res.redirect(`${frontendUrl}/auth/google/callback?error=${encodeURIComponent('Authentication failed')}`);
     }
 
     // Generate JWT token
     const token = jwt.sign(
-      { id: user._id, role: user.role || 'user', username: user.email },
+      { 
+        id: user._id, 
+        role: user.role || 'user', 
+        username: user.username || user.email.split('@')[0], 
+        email: user.email,
+        department: user.department
+      },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
 
-    // Return token in response
-    res.json({
-      token,
-      user: {
-        _id: user._id,
-        email: user.email,
-        role: user.role || 'user',
-        username: user.email
-      }
-    });
+    // Set httpOnly cookie so frontend doesn't need to store token in localStorage
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000 // 1 day
+    };
+    res.cookie('auth_token', token, cookieOptions);
+
+    // Redirect to frontend callback page to process token
+    // The callback page will store token and redirect to appropriate dashboard
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    return res.redirect(`${frontendUrl}/auth/google/callback?token=${encodeURIComponent(token)}`);
   })(req, res, next);
 });
 

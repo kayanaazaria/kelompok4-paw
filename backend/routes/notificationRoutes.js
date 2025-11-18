@@ -7,4 +7,8 @@ router.get('/', authMiddleware, getMyNotifications);
 
 router.put('/:id/read', authMiddleware, markAsRead);
 
+// SSE stream for real-time notifications
+const { streamNotifications } = require('../controllers/notificationController.js');
+router.get('/stream', authMiddleware, streamNotifications);
+
 module.exports = router;

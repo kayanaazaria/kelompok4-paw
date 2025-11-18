@@ -27,16 +27,31 @@ async function viewFinalDoc(req, res) {
 async function downloadFinalDoc(req, res) {
   try {
     const { id } = req.params;
-    const laporan = await Laporan.findById(id).lean();
-    if (!laporan) return res.status(404).json({ message: 'Laporan tidak ditemukan' });
+    console.log('[Download] Starting download for ID:', id);
 
+    const laporan = await Laporan.findById(id)
+      .populate('createdByHSE', 'username email')
+      .populate('signedByKabid', 'username email')
+      .populate('approvedByDirektur', 'username email')
+      .lean();
+
+    if (!laporan) {
+      console.log('[Download] Laporan not found:', id);
+      return res.status(404).json({ message: 'Laporan tidak ditemukan' });
+    }
+
+    console.log('[Download] Laporan found, generating PDF...');
     const { pdfBuffer } = await buildFinalPdfFromLaporan(laporan, { qrLink: makeVerifyUrl(id) });
+
+    console.log('[Download] PDF generated, size:', pdfBuffer.length, 'bytes');
     res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Length', pdfBuffer.length);
     res.setHeader('Content-Disposition', `attachment; filename="laporan-final-${id}.pdf"`);
-    res.send(pdfBuffer);
+    res.end(pdfBuffer);
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ message: 'Gagal download PDF' });
+    console.error('[Download] Error:', e.message);
+    console.error('[Download] Stack:', e.stack);
+    res.status(500).json({ message: 'Gagal download PDF', error: e.message });
   }
 }
 

@@ -25,4 +25,20 @@ const markAsRead = async (req, res, next) => {
     }
 };
 
-module.exports = { getMyNotifications, markAsRead };
+// Server-Sent Events endpoint for streaming notifications
+const { subscribe } = require('../services/notificationStream');
+
+const streamNotifications = async (req, res, next) => {
+    try {
+        // authMiddleware must set req.user
+        const unsubscribe = subscribe(res, req.user ? req.user._id : null);
+
+        req.on('close', () => {
+            unsubscribe();
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
+module.exports = { getMyNotifications, markAsRead, streamNotifications };

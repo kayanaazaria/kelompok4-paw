@@ -7,6 +7,7 @@ const session = require('express-session');
 const passport = require('passport');
 require('./config/passport');  
 const errorHandler = require('./middleware/errorHandler');
+const cookieParser = require('cookie-parser');
 
 // Koneksi database
 connectDB();
@@ -46,44 +47,24 @@ app.get('/', (_,res) => res.send('OK - finaldoc branch'));
 
 // Security & Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5001'],
+  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5001'],
   credentials: true
 }));
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
-  crossOriginOpenerPolicy: { policy: "unsafe-none" }
+  crossOriginOpenerPolicy: { policy: "unsafe-none" },
+  frameguard: false // Disable X-Frame-Options untuk allow iframe
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Static folder for uploads
 app.use('/uploads', express.static('uploads'));
 
 // ================== ROUTES ==================
-const authRoutes = require('./routes/authRoutes');
-const userRoutes = require('./routes/userRoutes');
-const laporanRoutes = require('./routes/laporan');
-const notificationRoutes = require('./routes/notificationRoutes');
-const approvalRoutes = require('./routes/approvalRoutes');
-const finalDocumentRoutes = require('./routes/finalDocumentRoutes');
-const diagnosticsRoutes = require('./routes/testRoutes');
-
-// ROUTE TEST EMAIL
-const testRoutes = require("./routes/testRoutes"); 
-app.use("/api/test", testRoutes);
-
-// Auth routes untuk OAuth dan API
-app.use('/auth', authRoutes);        // Untuk OAuth Google
-app.use('/api/auth', authRoutes);    // Untuk login/register biasa
-
-// Daftar routes utama dengan prefix /api
-app.use('/api/users', userRoutes);
-app.use('/api/laporan', laporanRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/approvals', approvalRoutes);
-app.use('/finaldoc', finalDocumentRoutes);
-// Diagnostics (token / blacklist debug) - keep last
-app.use('/api/diag', diagnosticsRoutes);
+const routes = require('./routes');
+app.use('/', routes);
 
 // ================== ERROR HANDLER ==================
 app.use(errorHandler);

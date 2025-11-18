@@ -13,11 +13,12 @@ Digitalisasi Sistem Laporan Kecelakaan Solanum Agrotech (US1)
 
 ## Deskripsi Aplikasi
 Aplikasi ini dikembangkan untuk mendigitalisasi proses pelaporan kecelakaan kerja di Solanum Agrotech. Dengan sistem ini, seluruh proses mulai dari pembuatan laporan oleh HSE, approval oleh Kepala Bidang, hingga persetujuan akhir Direktur SDM dapat dilakukan secara terintegrasi, aman, dan terdokumentasi dengan baik. Aplikasi web ini dibuat untuk menghindari kehilangan dokumen karena tercecer atau terbuang.
-Fitur utama meliputi:
+## Fitur utama meliputi:
 - Registrasi & Login Multi-Role (Admin, HSE, Kepala Bidang, Direktur SDM).
 - Pembuatan & Pengajuan Laporan Kecelakaan oleh HSE.
 - Tracking status laporan (Draft, Menunggu Approval, Selesai).
-- Approval & Penolakan laporan oleh Kepala Bidang dan Direktur SDM.
+- Dashboard Kepala Bidang untuk melihat laporan dari departemen masing-masing, approve/tolak laporan, dan lihat detail laporan.
+- Dashboard Direktur SDM untuk melihat semua laporan yang menunggu persetujuan, approve/tolak laporan, dan lihat history laporan.
 - Notifikasi Email Otomatis untuk setiap tahap persetujuan.
 - History dokumen & QR Code untuk verifikasi laporan final.
 - Keamanan sistem dengan password hashing & JWT Authentication.

@@ -28,7 +28,8 @@ const createUser = async (req, res, next) => {
         username: user.username,
         email: user.email,
         role: user.role,
-        department: user.department
+        department: user.department,
+        createdAt: user.createdAt
       });
     }
   } catch (err) {
@@ -85,8 +86,86 @@ const updateUserRoleAndDepartment = async (req, res, next) => {
   }
 };
 
+// Delete user
+const deleteUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      res.status(404);
+      return next(new Error('User tidak ditemukan'));
+    }
+
+    // Prevent deleting other admin users (only can delete self if admin)
+    if (user.role === 'admin' && user._id.toString() !== req.user._id.toString()) {
+      res.status(403);
+      return next(new Error('Tidak dapat menghapus admin lain'));
+    }
+
+    // If deleting own account and is admin, check if last admin
+    if (user._id.toString() === req.user._id.toString() && user.role === 'admin') {
+      const adminCount = await User.countDocuments({ role: 'admin' });
+      
+      if (adminCount <= 1) {
+        res.status(403);
+        return next(new Error('Tidak dapat menghapus diri sendiri karena Anda adalah admin terakhir'));
+      }
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+
+    return res.json({ message: 'User berhasil dihapus' });
+
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Change password untuk user yang sedang login
+const changePassword = async (req, res, next) => {
+  const { currentPassword, newPassword } = req.body;
+
+  try {
+    if (!currentPassword || !newPassword) {
+      res.status(400);
+      return next(new Error('Password saat ini dan password baru wajib diisi'));
+    }
+
+    if (newPassword.length < 8) {
+      res.status(400);
+      return next(new Error('Password baru harus minimal 8 karakter'));
+    }
+
+    // Cari user yang sedang login
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      res.status(404);
+      return next(new Error('User tidak ditemukan'));
+    }
+
+    // Cek apakah password saat ini benar
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      res.status(400);
+      return next(new Error('Password saat ini salah'));
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.save();
+
+    return res.json({ message: 'Password berhasil diubah' });
+
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   createUser,
   getAllUsers,
-  updateUserRoleAndDepartment
+  updateUserRoleAndDepartment,
+  deleteUser,
+  changePassword
 };
