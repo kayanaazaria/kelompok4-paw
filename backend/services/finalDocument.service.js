@@ -77,13 +77,30 @@ async function buildFinalPdfFromLaporan(laporan, { qrLink }) {
   const doc = new PDFDocument({ size: 'A4', margins: { top: 30, bottom: 40, left: 40, right: 40 } });
   const chunks = [];
 
-  // Register Poppins fonts
+  // Register Poppins fonts dengan fallback ke Helvetica
   const path = require('path');
+  const fs = require('fs');
   const poppinsRegular = path.join(__dirname, '../fonts/Poppins-Regular.ttf');
   const poppinsBold = path.join(__dirname, '../fonts/Poppins-Bold.ttf');
 
-  doc.registerFont('Poppins', poppinsRegular);
-  doc.registerFont('Poppins-Bold', poppinsBold);
+  // Cek apakah font files tersedia, jika tidak gunakan Helvetica
+  try {
+    if (fs.existsSync(poppinsRegular) && fs.existsSync(poppinsBold)) {
+      doc.registerFont('Poppins', poppinsRegular);
+      doc.registerFont('Poppins-Bold', poppinsBold);
+      console.log('[PDF] Using custom Poppins fonts');
+    } else {
+      // Gunakan Helvetica sebagai fallback (built-in PDFKit)
+      doc.registerFont('Poppins', 'Helvetica');
+      doc.registerFont('Poppins-Bold', 'Helvetica-Bold');
+      console.log('[PDF] Poppins fonts not found, using Helvetica as fallback');
+    }
+  } catch (err) {
+    // Jika error, fallback ke Helvetica
+    doc.registerFont('Poppins', 'Helvetica');
+    doc.registerFont('Poppins-Bold', 'Helvetica-Bold');
+    console.log('[PDF] Error loading fonts, using Helvetica:', err.message);
+  }
 
   const colors = {
     primary: '#16a34a', // green-600
