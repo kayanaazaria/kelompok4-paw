@@ -53,7 +53,7 @@ export default function VerificationPage({ params }) {
             
             <div className="mt-4">
                 <h3>Detail Laporan</h3>
-                <p>Pekerja: {documentData.namaPekerja}</p>
+                <p>Pegawai: {documentData.namaPekerja}</p>
                 <p>Departemen: {documentData.department}</p>
                 
                 {}

@@ -35,7 +35,7 @@ const LaporanInfo = ({ laporan }) => {
             <User className="w-5 h-5 text-purple-600" />
           </div>
           <div className="flex-1">
-            <p className="text-sm text-gray-500 mb-1">Nama Pekerja</p>
+            <p className="text-sm text-gray-500 mb-1">Nama Pegawai</p>
             <p className="font-semibold text-gray-900">{laporan.namaPekerja}</p>
           </div>
         </div>
@@ -45,7 +45,7 @@ const LaporanInfo = ({ laporan }) => {
             <FileText className="w-5 h-5 text-indigo-600" />
           </div>
           <div className="flex-1">
-            <p className="text-sm text-gray-500 mb-1">Nomor Induk Pekerja</p>
+            <p className="text-sm text-gray-500 mb-1">Nomor Induk Pegawai</p>
             <p className="font-semibold text-gray-900">{laporan.nomorIndukPekerja}</p>
           </div>
         </div>

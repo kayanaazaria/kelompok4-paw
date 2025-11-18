@@ -140,7 +140,7 @@ export default function ReportList({
                 {filteredReports.map((report) => (
                   <tr key={report._id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {report.nomorIndukPekerja || "INC-2025-001"}
+                      {report.nomorLaporan || "INC-2025-001"}
                     </td>
                     <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {report.namaPekerja}
@@ -175,7 +175,7 @@ export default function ReportList({
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <p className="font-semibold text-gray-900 text-sm mb-1">{report.namaPekerja}</p>
-                      <p className="text-xs text-gray-600">{report.nomorIndukPekerja || "INC-2025-001"}</p>
+                      <p className="text-xs text-gray-600">{report.nomorLaporan || "INC-2025-001"}</p>
                     </div>
                     {getStatusBadge(report.status)}
                   </div>

@@ -56,7 +56,7 @@ const ReportCards = ({ reports, onEdit, onDelete, onView, onSubmit }) => {
             </div>
             <div className="flex items-center gap-2">
               <Hash size={16} className="text-gray-400" />
-              <span className="text-sm text-gray-600">{report.nomorIndukPekerja}</span>
+              <span className="text-sm text-gray-600">{report.nomorLaporan}</span>
             </div>
             <div className="flex items-center gap-2">
               <Building2 size={16} className="text-gray-400" />

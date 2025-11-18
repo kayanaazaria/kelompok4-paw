@@ -3,18 +3,25 @@
 import { AlertTriangle } from 'lucide-react';
 
 export default function DeleteConfirmModal({ 
+  show,
   isOpen, 
   onClose, 
   onConfirm, 
-  userName 
+  userName,
+  itemName,
+  title 
 }) {
-  if (!isOpen) return null;
+  const isModalOpen = show || isOpen;
+  if (!isModalOpen) return null;
+
+  const displayName = itemName || userName;
+  const displayTitle = title || 'Hapus Pengguna?'
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-opacity-50"
+        className="absolute inset-0 bg-opacity-50 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       ></div>
 
@@ -29,11 +36,11 @@ export default function DeleteConfirmModal({
           
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Hapus Pengguna?
+              {displayTitle}
             </h3>
             <p className="text-sm text-gray-600 mb-1">
-              Anda yakin ingin menghapus pengguna{' '}
-              <span className="font-semibold text-gray-900">{userName}</span>?
+              Anda yakin ingin menghapus {' '}
+              <span className="font-semibold text-gray-900">{displayName}</span>?
             </p>
             <p className="text-sm text-red-600">
               Tindakan ini tidak dapat dibatalkan!
@@ -49,7 +56,10 @@ export default function DeleteConfirmModal({
             Batal
           </button>
           <button
-            onClick={onConfirm}
+            onClick={() => {
+              onConfirm();
+              onClose();
+            }}
             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition"
           >
             Ya, Hapus

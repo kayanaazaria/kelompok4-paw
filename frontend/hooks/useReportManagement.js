@@ -109,7 +109,7 @@ const useReportManagement = () => {
   const validateForm = () => {
     const errors = {};
     if (!formData.tanggalKejadian) errors.tanggalKejadian = "Tanggal kejadian wajib diisi";
-    if (!formData.namaPekerja) errors.namaPekerja = "Nama pekerja wajib diisi";
+    if (!formData.namaPekerja) errors.namaPekerja = "Nama pegawai wajib diisi";
     if (!formData.nomorIndukPekerja) errors.nomorIndukPekerja = "NIP wajib diisi";
     if (!formData.department) errors.department = "Departemen wajib diisi";
     if (!formData.skalaCedera) errors.skalaCedera = "Skala cedera wajib diisi";
