@@ -158,7 +158,7 @@ export default function ApprovalFlowPage({ params }) {
 
     const getStatusBadge = (status) => {
         if (status === 'Disetujui') {
-            return <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">Selesai</span>;
+            return <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">Disetujui</span>;
         } else if (status === 'Draft') {
             return <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-semibold">Draft</span>;
         } else if (status.includes('Menunggu')) {
@@ -171,9 +171,9 @@ export default function ApprovalFlowPage({ params }) {
     const getTimelineColor = (state) => {
         switch(state) {
             case 'done':
-                return 'bg-green-600';
+                return 'bg-green-500';
             case 'current':
-                return 'bg-yellow-400';
+                return 'bg-yellow-500';
             case 'rejected':
                 return 'bg-red-500';
             case 'created_draft': 

@@ -146,12 +146,12 @@ export default function KepalaBidangDashboard() {
 
   const getStatusBadge = (status) => {
     if (status === "Menunggu Persetujuan Kepala Bidang") 
-      return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">Menunggu</span>;
+      return <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">Menunggu</span>;
     if (status === "Menunggu Persetujuan Direktur SDM" || status === "Disetujui") 
-      return <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Disetujui</span>;
+      return <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Disetujui</span>;
     if (status === "Ditolak Kepala Bidang") 
-      return <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">Ditolak</span>;
-    return <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">{status}</span>;
+      return <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">Ditolak</span>;
+    return <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">{status}</span>;
   };
 
   const getTimeSince = (date) => {

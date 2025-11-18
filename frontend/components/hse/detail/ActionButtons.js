@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Edit2, Eye, Download, Trash2, X, Calendar, User, Briefcase, FileText, AlertTriangle } from "lucide-react";
 import api from "@/services/api";
 import ErrorAlert from "@/components/shared/ErrorAlert";
+import { ApprovalTimelineCompact } from "../../shared/ApprovalTimeline";
 
 const ActionButtons = ({ laporan, onEdit, onSubmit, onDelete }) => {
   const [showModal, setShowModal] = useState(false);
@@ -229,63 +230,32 @@ const ActionButtons = ({ laporan, onEdit, onSubmit, onDelete }) => {
                 {/* Alur Persetujuan */}
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-3">Alur Persetujuan</h4>
-                  <div className="space-y-2">
-                    {/* Laporan Terkirim */}
-                    <div className="flex items-center gap-3 bg-green-50 p-3 rounded-lg">
-                      <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none">
-                          <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-gray-900">Laporan Terkirim</p>
-                        <p className="text-sm text-gray-600">Disetujui oleh HSE • {new Date(laporan.createdAt).toLocaleDateString("id-ID")}</p>
-                      </div>
-                    </div>
-
-                    {/* Persetujuan Kepala Bidang */}
-                    {laporan.signedByKabid && (
-                      <div className="flex items-center gap-3 bg-green-50 p-3 rounded-lg">
-                        <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                          <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none">
-                            <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-semibold text-gray-900">Persetujuan Kepala Bidang</p>
-                          <p className="text-sm text-gray-600">Disetujui oleh {laporan.signedByKabid.username} • {new Date(laporan.updatedAt).toLocaleDateString("id-ID")}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Persetujuan Direktur SDM */}
-                    {laporan.status === 'Disetujui' && (
-                      <div className="flex items-center gap-3 bg-green-50 p-3 rounded-lg">
-                        <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                          <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none">
-                            <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-semibold text-gray-900">Persetujuan Direktur SDM</p>
-                          <p className="text-sm text-gray-600">Disetujui oleh {laporan.approvedByDirektur?.username || 'Direktur SDM'} • {new Date(laporan.updatedAt).toLocaleDateString("id-ID")}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Selesai */}
-                    <div className="flex items-center gap-3 bg-green-50 p-3 rounded-lg">
-                      <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none">
-                          <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-gray-900">Selesai</p>
-                        <p className="text-sm text-gray-600">Proses persetujuan telah selesai</p>
-                      </div>
-                    </div>
-                  </div>
+                  <ApprovalTimelineCompact steps={[
+                    { 
+                      id: 1, 
+                      label: 'Laporan Terkirim',
+                      detail: `Disetujui oleh HSE • ${new Date(laporan.createdAt).toLocaleDateString("id-ID")}`,
+                      status: 'done'
+                    },
+                    ...(laporan.signedByKabid ? [{
+                      id: 2,
+                      label: 'Persetujuan Kepala Bidang',
+                      detail: `Disetujui oleh ${laporan.signedByKabid.username} • ${new Date(laporan.updatedAt).toLocaleDateString("id-ID")}`,
+                      status: 'done'
+                    }] : []),
+                    {
+                      id: 3,
+                      label: 'Persetujuan Direktur SDM',
+                      detail: `Disetujui oleh ${laporan.approvedByDirektur?.username || 'Direktur SDM'} • ${new Date(laporan.updatedAt).toLocaleDateString("id-ID")}`,
+                      status: 'done'
+                    },
+                    {
+                      id: 4,
+                      label: 'Selesai',
+                      detail: 'Proses persetujuan telah selesai',
+                      status: 'done'
+                    }
+                  ]} />
                 </div>
 
                 {/* Info QR / ID Dokumen */}
