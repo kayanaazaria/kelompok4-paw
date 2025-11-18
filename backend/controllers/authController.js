@@ -1,7 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const User = require('../models/userModel');
 const { blacklistToken, isTokenBlacklisted } = require('../utils/jwtBlacklist');
+const sendEmail = require('../utils/emailService');
 
 const generateToken = (id, role, username, email, department = null) => {
   const payload = { id, role, username, email };
@@ -228,10 +230,135 @@ const universalLogout = async (req, res) => {
   }
 };
 
+// Forgot Password - Generate reset token and send email
+const forgotPassword = async (req, res, next) => {
+  const { email } = req.body;
+  
+  try {
+    if (!email) {
+      res.status(400);
+      return next(new Error('Email harus diisi'));
+    }
+
+    const user = await User.findOne({ email });
+    
+    if (!user) {
+      res.status(404);
+      return next(new Error('User dengan email tersebut tidak ditemukan'));
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    
+    // Hash token before saving to database
+    user.resetPasswordToken = crypto
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
+    
+    // Set expiry to 1 hour
+    user.resetPasswordExpires = Date.now() + 3600000;
+    
+    await user.save();
+
+    // Create reset URL
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
+    
+    const message = `Anda menerima email ini karena Anda (atau orang lain) meminta reset password.\n\n
+Silakan klik link berikut atau copy paste ke browser Anda untuk menyelesaikan proses reset password:\n\n
+${resetUrl}\n\n
+Link ini akan kadaluarsa dalam 1 jam.\n\n
+Jika Anda tidak meminta reset password, abaikan email ini dan password Anda tidak akan berubah.`;
+
+    try {
+      await sendEmail(
+        user.email,
+        'Reset Password - HSE System',
+        message
+      );
+
+      res.status(200).json({
+        success: true,
+        message: 'Email reset password telah dikirim'
+      });
+    } catch (err) {
+      console.error('Error sending email:', err);
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+      await user.save();
+      
+      res.status(500);
+      return next(new Error('Email tidak dapat dikirim'));
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Reset Password - Verify token and update password
+const resetPassword = async (req, res, next) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  try {
+    if (!password) {
+      res.status(400);
+      return next(new Error('Password baru harus diisi'));
+    }
+
+    if (password.length < 8) {
+      res.status(400);
+      return next(new Error('Password minimal 8 karakter'));
+    }
+
+    // Hash the token from URL to compare with database
+    const resetPasswordToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    const user = await User.findOne({
+      resetPasswordToken,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      res.status(400);
+      return next(new Error('Token tidak valid atau sudah kadaluarsa'));
+    }
+
+    // Set new password
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    // Send confirmation email
+    try {
+      await sendEmail(
+        user.email,
+        'Password Berhasil Diubah - HSE System',
+        'Password Anda telah berhasil diubah. Jika Anda tidak melakukan perubahan ini, segera hubungi administrator.'
+      );
+    } catch (err) {
+      console.error('Error sending confirmation email:', err);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Password berhasil diubah'
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = { 
   registerUser, 
   loginUser, 
   logoutUser, 
   logoutGoogleUser, 
-  universalLogout 
+  universalLogout,
+  forgotPassword,
+  resetPassword
 };

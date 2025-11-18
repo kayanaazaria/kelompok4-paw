@@ -6,7 +6,8 @@ const {
     createUser, 
     getAllUsers,
     updateUserRoleAndDepartment,
-    deleteUser
+    deleteUser,
+    changePassword
 } = require('../controllers/userController');
 
 router.post('/', authMiddleware, roleCheck('admin'), createUser);
@@ -26,5 +27,7 @@ router.get('/profile', authMiddleware, (req, res) => {
         department: req.user.department || null
     });
 });
+
+router.post('/change-password', authMiddleware, changePassword);
 
 module.exports = router;

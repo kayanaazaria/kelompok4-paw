@@ -121,9 +121,51 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
+// Change password untuk user yang sedang login
+const changePassword = async (req, res, next) => {
+  const { currentPassword, newPassword } = req.body;
+
+  try {
+    if (!currentPassword || !newPassword) {
+      res.status(400);
+      return next(new Error('Password saat ini dan password baru wajib diisi'));
+    }
+
+    if (newPassword.length < 8) {
+      res.status(400);
+      return next(new Error('Password baru harus minimal 8 karakter'));
+    }
+
+    // Cari user yang sedang login
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      res.status(404);
+      return next(new Error('User tidak ditemukan'));
+    }
+
+    // Cek apakah password saat ini benar
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      res.status(400);
+      return next(new Error('Password saat ini salah'));
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.save();
+
+    return res.json({ message: 'Password berhasil diubah' });
+
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   createUser,
   getAllUsers,
   updateUserRoleAndDepartment,
-  deleteUser
+  deleteUser,
+  changePassword
 };

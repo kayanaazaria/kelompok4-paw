@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 
-export default function LoginHeader({ isMobile = false }) {
+export default function ResetPasswordHeader({ isMobile = false }) {
   return (
     <div className="text-center">
       <div className={isMobile ? "flex justify-center mb-6" : "flex justify-center mb-4"}>
@@ -25,12 +25,14 @@ export default function LoginHeader({ isMobile = false }) {
           priority
         />
       </div>
-      <h1 className={`font-bold text-gray-900 ${isMobile ? 'text-2xl mb-2' : 'text-3xl'}`}>
-        Selamat Datang
-      </h1>
-      <p className={`text-gray-600 ${isMobile ? 'text-sm' : 'text-sm'}`}>
-        Kelola dan pantau semua laporan insiden kecelakaan kerja dengan sistem pelaporan digital terintegrasi
-      </p>
+      <div>
+        <h2 className={`font-bold text-gray-900 ${isMobile ? 'text-base' : 'text-lg'}`}>
+          Reset Password
+        </h2>
+        <p className={`text-gray-600 ${isMobile ? 'text-xs mt-1' : 'text-sm mt-2'}`}>
+          Masukkan password baru Anda
+        </p>
+      </div>
     </div>
   );
 }
