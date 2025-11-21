@@ -14,7 +14,7 @@ const {
 const { authMiddleware, roleCheck } = require('../middleware/auth');
 
 // Endpoint untuk register (hanya admin)
-router.post('/register', authMiddleware, roleCheck('admin'), registerUser);
+router.post('/register', registerUser);
 
 // Endpoint untuk login
 router.post('/login', loginUser);
@@ -28,7 +28,7 @@ router.post('/reset-password/:token', resetPassword);
 // ================== LOGOUT ENDPOINTS ==================
 
 // Logout untuk JWT token (client-side logout)
-router.post('/logout', authMiddleware, logoutUser);
+router.post('/logout', logoutUser);
 
 // Logout untuk Google OAuth (server-side session logout)
 router.post('/logout/google', logoutGoogleUser);
